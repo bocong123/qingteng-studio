@@ -1,0 +1,256 @@
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    // API 请求交给 functions/api 中的处理逻辑
+    if (url.pathname === "/api/lead" && request.method === "POST") {
+      return handleLead(request, env);
+    }
+
+    if (url.pathname === "/api/leads" && request.method === "GET") {
+      return handleLeads(request, env);
+    }
+
+    if (url.pathname === "/api/lead-status" && request.method === "POST") {
+      return handleLeadStatus(request, env);
+    }
+
+    // 其他请求交给静态资源
+    return env.ASSETS.fetch(request);
+  }
+};
+
+
+async function handleLead(request, env) {
+  try {
+    const data = await request.json();
+
+    const {
+      name = "",
+      phone = "",
+      wechat = "",
+      grade = "",
+      course = "",
+      message = "",
+      source = ""
+    } = data;
+
+    if (!name || !phone) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "姓名和手机号不能为空"
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
+    const raw = await env.LEADS.get("leads");
+
+    let arr = [];
+
+    if (raw) {
+      try {
+        arr = JSON.parse(raw);
+      } catch {
+        arr = [];
+      }
+    }
+
+    const lead = {
+      id: Date.now().toString(),
+      name,
+      phone,
+      wechat,
+      grade,
+      course,
+      message,
+      source,
+      time: new Date().toISOString(),
+      status: "未联系"
+    };
+
+    arr.unshift(lead);
+
+    await env.LEADS.put("leads", JSON.stringify(arr));
+
+    // Server酱通知
+    const key = env.SERVERCHAN_KEY;
+
+    if (key) {
+      try {
+        await fetch(
+          "https://sctapi.ftqq.com/" + key + ".send",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams({
+              title: "青藤画室收到新的报名咨询",
+              desp:
+                `姓名：${name}\n` +
+                `电话：${phone}\n` +
+                `微信：${wechat}\n` +
+                `年级：${grade}\n` +
+                `课程：${course}\n` +
+                `留言：${message}\n` +
+                `来源：${source}`
+            })
+          }
+        );
+      } catch (error) {
+        console.error("Server酱通知失败:", error);
+      }
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "提交成功"
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: "提交失败"
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+}
+
+
+async function handleLeads(request, env) {
+  try {
+    const raw = await env.LEADS.get("leads");
+
+    const leads = raw ? JSON.parse(raw) : [];
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        leads
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: "获取数据失败"
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+}
+
+
+async function handleLeadStatus(request, env) {
+  try {
+    const data = await request.json();
+
+    const {
+      id,
+      status
+    } = data;
+
+    if (!id || !status) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "参数不完整"
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
+    const raw = await env.LEADS.get("leads");
+
+    let arr = raw ? JSON.parse(raw) : [];
+
+    const index = arr.findIndex(
+      item => item.id === id
+    );
+
+    if (index === -1) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "未找到该客户"
+        }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
+    arr[index].status = status;
+
+    await env.LEADS.put(
+      "leads",
+      JSON.stringify(arr)
+    );
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "状态更新成功"
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: "更新失败"
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+}
