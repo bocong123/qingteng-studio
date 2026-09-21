@@ -18,5 +18,11 @@
     "binding": "QT_ADMIN",
     "id": "308c2a0618ac40569570476997266ee3"
   }
-]
+],
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  }
 }
