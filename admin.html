@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青藤画室 · 网站后台管理</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%233C5A49'/%3E%3Cpath d='M14 18c10 2 18 8 20 20 1-8 4-16 16-20-6 12-10 18-10 26 0 4 2 6 4 7-5-1-9-5-10-9-2 5-8 9-14 10 4-8 4-14 2-19-1-5-4-9-8-15z' fill='%23F6F4EE'/%3E%3C/svg%3E">
+<style>
+:root{--paper:#F4F1EA;--ink:#1B1A18;--ink2:#5C574E;--ink3:#8C867A;--moss:#3C5A49;--moss2:#2C4436;--line:#E2DDD1;--white:#FFFFFF;--danger:#A33;--ok:#3C5A49}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;background:var(--paper);color:var(--ink);font-size:14px;line-height:1.7}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:3px;padding:8px 10px;width:100%;transition:border-color .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--moss)}
+textarea{resize:vertical;line-height:1.8}
+label{display:block;font-size:12.5px;color:var(--ink2);margin:14px 0 5px;font-weight:500}
+.hint{font-size:12px;color:var(--ink3);margin-top:4px;font-weight:300}
+.btn{border:1px solid var(--line);background:#fff;border-radius:3px;padding:8px 16px;font-size:13.5px;color:var(--ink);transition:all .2s}
+.btn:hover{border-color:var(--moss);color:var(--moss)}
+.btn-p{background:var(--moss);color:#F4F1E8;border-color:var(--moss)}
+.btn-p:hover{background:var(--moss2);color:#fff}
+.btn-d{border-color:#e0c9c9;color:var(--danger)}
+.btn-d:hover{border-color:var(--danger);color:var(--danger)}
+.btn-sm{padding:4px 10px;font-size:12.5px;border-radius:3px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* 登录屏 */
+#loginScreen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:var(--paper)}
+.login-card{width:360px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:40px 36px;box-shadow:0 12px 40px rgba(27,26,24,.06)}
+.login-card .lc-logo{width:52px;height:52px;margin:0 auto 14px;display:block}
+.login-card h1{font-size:20px;text-align:center;font-weight:700;letter-spacing:.05em}
+.login-card .lc-sub{text-align:center;color:var(--ink3);font-size:12.5px;margin:6px 0 22px}
+.login-err{color:var(--danger);font-size:12.5px;text-align:center;min-height:18px;margin-top:10px}
+
+/* 布局 */
+#app{display:none}
+.topbar{position:fixed;top:0;left:0;right:0;height:56px;background:var(--moss);color:#EDEADF;display:flex;align-items:center;padding:0 22px;z-index:50;gap:16px}
+.topbar .tb-brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:700;letter-spacing:.08em;white-space:nowrap}
+.topbar .tb-brand svg{width:26px;height:26px}
+.topbar .tb-sp{flex:1}
+.topbar .tb-link{color:#CFE3D6;font-size:13px;text-decoration:none;padding:7px 12px;border:1px solid rgba(255,255,255,.25);border-radius:3px;white-space:nowrap}
+.topbar .tb-link:hover{background:rgba(255,255,255,.12)}
+.sidebar{position:fixed;top:56px;bottom:0;left:0;width:196px;background:#2A2A28;color:#C9C6BC;overflow-y:auto;padding:14px 0 30px;z-index:40}
+.sidebar .sb-group{font-size:11px;color:#8B887E;letter-spacing:.18em;padding:16px 22px 6px}
+.sidebar a{display:flex;align-items:center;gap:9px;padding:9px 22px;color:#C9C6BC;text-decoration:none;font-size:13.5px;border-left:3px solid transparent;transition:all .15s}
+.sidebar a svg{width:15px;height:15px;flex:none;opacity:.75}
+.sidebar a:hover{background:rgba(255,255,255,.05);color:#fff}
+.sidebar a.active{background:rgba(60,90,73,.32);color:#fff;border-left-color:#8FB29B}
+.main{margin-left:196px;margin-top:56px;padding:28px 34px;max-width:1060px}
+.page-title{font-size:20px;font-weight:700;letter-spacing:.03em;margin-bottom:4px}
+.page-sub{color:var(--ink3);font-size:13px;margin-bottom:22px;font-weight:300}
+.card{background:#fff;border:1px solid var(--line);border-radius:6px;padding:24px 26px;margin-bottom:20px}
+.card h3{font-size:15px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.card h3 .ct{color:var(--ink3);font-weight:400;font-size:12.5px;margin-left:8px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 18px}
+.actions{margin-top:18px;display:flex;gap:10px;align-items:center}
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.bar .sp{flex:1}
+.search{max-width:240px}
+
+/* 列表 */
+.item-list{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:12px;background:#FAF8F2;border:1px solid var(--line);border-radius:5px;padding:12px 14px}
+.item .ic-thumb{width:56px;height:56px;border-radius:4px;object-fit:cover;flex:none;background:#EFEBE1}
+.item .ic-body{flex:1;min-width:0}
+.item .ic-t{font-size:14px;font-weight:600;line-height:1.4}
+.item .ic-s{font-size:12px;color:var(--ink3);font-weight:300;line-height:1.6;margin-top:2px}
+.item .ic-ops{display:flex;gap:6px;flex:none}
+.badge{display:inline-block;background:#EFEBE1;color:var(--moss);border:1px solid var(--line);font-size:11px;padding:1px 9px;border-radius:999px;margin-right:6px;white-space:nowrap}
+.empty{padding:34px;text-align:center;color:var(--ink3);font-size:13px;font-weight:300}
+.tag-box{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.fa{font-size:13px}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%);background:var(--ink);color:#F4F1E8;padding:11px 26px;border-radius:4px;font-size:13.5px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+#toast.show{opacity:1}
+.upload-zone{border:2px dashed var(--line);border-radius:6px;padding:22px;text-align:center;color:var(--ink3);cursor:pointer;transition:all .2s;background:#FCFAF5}
+.upload-zone:hover{border-color:var(--moss);color:var(--moss)}
+.upload-zone input{display:none}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px}
+.g-item{position:relative;background:#fff;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.g-item img{width:100%;height:110px;object-fit:cover;display:block}
+.g-item .g-cap{padding:7px 9px;font-size:11.5px;color:var(--ink2);line-height:1.5}
+.g-item .g-del{position:absolute;top:6px;right:6px;background:rgba(27,26,24,.72);color:#fff;border:none;border-radius:3px;width:24px;height:24px;font-size:13px;line-height:1}
+.g-item .g-del:hover{background:var(--danger)}
+.g-item .g-choose{position:absolute;bottom:6px;right:6px;background:var(--moss);color:#fff;border:none;border-radius:3px;padding:4px 8px;font-size:11px;opacity:.9}
+.g-item .g-choose:hover{opacity:1}
+.g-item.chosen{outline:2px solid var(--moss)}
+@media (max-width:760px){
+  .sidebar{display:none}
+  .main{margin-left:0;padding:20px 16px}
+  .row2,.row3{grid-template-columns:1fr}
+  .topbar .tb-link{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- 登录 -->
+<div id="loginScreen">
+  <div class="login-card">
+    <svg class="lc-logo" viewBox="0 0 64 64" fill="none"><rect width="64" height="64" rx="12" fill="#3C5A49"/><path d="M14 18c10 2 18 8 20 20 1-8 4-16 16-20-6 12-10 18-10 26 0 4 2 6 4 7-5-1-9-5-10-9-2 5-8 9-14 10 4-8 4-14 2-19-1-5-4-9-8-15z" fill="#F6F4EE"/></svg>
+    <h1>青藤画室 · 网站后台</h1>
+    <p class="lc-sub">输入管理密码进入维护系统</p>
+    <label for="pwInput">管理密码</label>
+    <input id="pwInput" type="password" placeholder="请输入密码" autocomplete="current-password">
+    <div class="login-err" id="loginErr"></div>
+    <button class="btn btn-p" id="loginBtn" style="width:100%;padding:11px">登 录</button>
+  </div>
+</div>
+
+<!-- 主界面 -->
+<div id="app">
+  <header class="topbar">
+    <div class="tb-brand">
+      <svg viewBox="0 0 64 64" fill="none"><path d="M14 18c10 2 18 8 20 20 1-8 4-16 16-20-6 12-10 18-10 26 0 4 2 6 4 7-5-1-9-5-10-9-2 5-8 9-14 10 4-8 4-14 2-19-1-5-4-9-8-15z" fill="#F6F4EE"/></svg>
+      青藤画室官网后台
+    </div>
+    <div class="tb-sp"></div>
+    <a class="tb-link" href="index.html" target="_blank">打开前台首页</a>
+    <a class="tb-link" href="javascript:void(0)" id="rebuildBtn">重建全站</a>
+    <a class="tb-link" href="javascript:void(0)" id="logoutBtn">退出登录</a>
+  </header>
+
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <main class="main" id="view"></main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ================= 基础 ================= */
+const $ = (s, el) => (el || document).querySelector(s);
+const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
+let TOKEN = localStorage.getItem("qt_token") || "";
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+function toast(msg, isErr) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.style.background = isErr ? "#8C3A3A" : "#1B1A18";
+  t.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove("show"), 2600);
+}
+async function api(method, path, data, raw) {
+  const headers = { "X-Token": TOKEN };
+  let body = null;
+  if (data !== undefined) {
+    headers["Content-Type"] = "application/json";
+    body = JSON.stringify(data);
+  } else if (raw !== undefined) {
+    headers["Content-Type"] = "application/octet-stream";
+    body = raw;
+  }
+  const res = await fetch(path, { method, headers, body });
+  let j = null;
+  try { j = await res.json(); } catch (e) {}
+  if (res.status === 401 && !path.includes("/api/login")) {
+    localStorage.removeItem("qt_token");
+    location.reload();
+  }
+  if (!res.ok && j) throw new Error(j.error || "请求失败");
+  return j;
+}
+async function loadData(module) { return await api("GET", "/api/data/" + module); }
+async function saveData(module, data, msg) {
+  await api("POST", "/api/save", { module, data });
+  toast(msg || "已保存，前台页面已同步更新");
+}
+function uploadFiles(files, folder, onEach) {
+  const list = Array.from(files);
+  let i = 0;
+  const results = [];
+  async function next() {
+    if (i >= list.length) return results;
+    const f = list[i++];
+    const j = await api("POST", "/api/upload?folder=" + folder + "&name=" + encodeURIComponent(f.name), undefined, f);
+    results.push(j.url);
+    if (onEach) onEach(j.url, i, list.length);
+    return next();
+  }
+  return next();
+}
+function confirmDel(msg) { return window.confirm(msg || "确定删除？此操作不可恢复。"); }
+
+/* ================= 导航 ================= */
+const NAV = [
+  { group: "内容管理" },
+  { key: "site", label: "首页内容", icon: "M3 12l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" },
+  { key: "founder", label: "创始人管理", icon: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21c0-4 4-6 8-6s8 2 8 6" },
+  { key: "teacher", label: "首页教师介绍", icon: "M16 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21c0-4 4-6 8-6M22 21c0-3-2-5-5-6" },
+  { key: "courses", label: "课程管理", icon: "M4 5h16v4H4zM4 11h16v4H4zM4 17h10v4H4z" },
+  { key: "works", label: "学生作品", icon: "M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z" },
+  { key: "cases", label: "成长案例", icon: "M12 21s-7-5.6-7-11a7 7 0 1 1 14 0c0 5.4-7 11-7 11zM12 14a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" },
+  { key: "leads", label: "咨询线索", icon: "M21 11.5a8.4 8.4 0 0 1-8.5 8.4c-1.4 0-2.8-.3-4-.8L3 20l1-4.4a8.4 8.4 0 0 1-1.5-4.1 8.4 8.4 0 0 1 8.5-8.4 8.4 8.4 0 0 1 10 9.4z" },
+  { group: "问答 · 文章" },
+  { key: "faq", label: "常见问题 FAQ", icon: "M9 9a3 3 0 1 1 5.5 1.8c-.9 1-1.5 1.4-1.5 2.7M12 18h.01" },
+  { key: "articles", label: "文章管理", icon: "M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6" },
+  { group: "升学规划中心" },
+  { key: "planning", label: "升学规划栏目", icon: "M4 19V5M4 19h16M7 16l3-5 3 3 4-7" },
+  { group: "系统" },
+  { key: "account", label: "账号设置", icon: "M12 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM4 21c0-4 4-6 8-6s8 2 8 6" },
+  { key: "settings", label: "微信通知设置", icon: "M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M10.3 21a1.94 1.94 0 0 0 3.4 0" },
+  { key: "help", label: "使用说明", icon: "M4 4h16v13H9l-5 4zM9 9h6M9 12h4" },
+];
+
+function renderNav() {
+  $("#sidebar").innerHTML = NAV.map(n => {
+    if (n.group) return '<div class="sb-group">' + esc(n.group) + "</div>";
+    return '<a href="javascript:void(0)" data-key="' + n.key + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="' + n.icon + '"/></svg>' + esc(n.label) + "</a>";
+  }).join("");
+  $$("#sidebar a").forEach(a => a.addEventListener("click", () => { setActive(a.dataset.key); go(a.dataset.key); }));
+}
+function setActive(k) {
+  $$("#sidebar a").forEach(a => a.classList.toggle("active", a.dataset.key === k));
+}
+const VIEWS = {};
+function go(key) {
+  setActive(key);
+  if (VIEWS[key]) VIEWS[key]();
+}
+function setView(title, sub, html) {
+  $("#view").innerHTML = '<div class="page-title">' + esc(title) + '</div><div class="page-sub">' + esc(sub) + '</div>' + html;
+}
+
+/* ================= 登录 ================= */
+async function doLogin() {
+  const pw = $("#pwInput").value;
+  $("#loginErr").textContent = "";
+  if (!pw) { $("#loginErr").textContent = "请输入密码"; return; }
+  const b = $("#loginBtn");
+  b.disabled = true; b.textContent = "登录中…";
+  try {
+    const j = await api("POST", "/api/login", { password: pw });
+    TOKEN = j.token;
+    localStorage.setItem("qt_token", TOKEN);
+    enterApp();
+  } catch (e) {
+    $("#loginErr").textContent = e.message || "登录失败";
+    b.disabled = false; b.textContent = "登 录";
+  }
+}
+function enterApp() {
+  $("#loginScreen").style.display = "none";
+  $("#app").style.display = "block";
+  renderNav();
+  go("site");
+}
+$("#loginBtn").addEventListener("click", doLogin);
+$("#pwInput").addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+$("#logoutBtn").addEventListener("click", async () => {
+  try { await api("POST", "/api/logout"); } catch (e) {}
+  localStorage.removeItem("qt_token");
+  location.reload();
+});
+$("#rebuildBtn").addEventListener("click", async () => {
+  const b = $("#rebuildBtn");
+  b.textContent = "重建中…";
+  try { const j = await api("POST", "/api/rebuild"); toast(j.message); }
+  catch (e) { toast(e.message, true); }
+  b.textContent = "重建全站";
+});
+if (TOKEN) {
+  (async () => {
+    try { await api("GET", "/api/data/site"); enterApp(); } catch (e) {}
+  })();
+}
+
+/* ================= 工具：表单绑定 ================= */
+function bindForm(root, obj) {
+  $$("[data-path]", root).forEach(el => {
+    const path = el.dataset.path.split(".");
+    let v = obj;
+    for (const k of path) v = v == null ? undefined : v[k];
+    if (el.type === "checkbox") el.checked = !!v;
+    else el.value = v == null ? "" : v;
+  });
+}
+function collectForm(root) {
+  const out = {};
+  $$("[data-path]", root).forEach(el => {
+    const path = el.dataset.path.split(".");
+    let cur = out;
+    for (let i = 0; i < path.length - 1; i++) {
+      if (!cur[path[i]]) cur[path[i]] = {};
+      cur = cur[path[i]];
+    }
+    cur[path[path.length - 1]] = el.type === "checkbox" ? el.checked : el.value.trim();
+  });
+  return out;
+}
+
+/* ================= 视图：创始人管理 ================= */
+let FB = null;
+VIEWS.founder = async () => {
+  FB = await loadData("fabout");
+  founderView();
+};
+function fRow(lbl, inner) { return `<div><label>${lbl}</label>${inner}</div>`; }
+function founderView() {
+  const fb = FB;
+  const prof = fb.profile || {}, hero = fb.hero || {};
+  const meta = (hero.meta || []).map((m, i) =>
+    `<div class="item"><div class="ic-body">
+      <div class="row2"><div><input data-meta-i="${i}" value="${esc(m.i||'')}" placeholder="英文小标"></div>
+      <div><input data-meta-b="${i}" value="${esc(m.b||'')}" placeholder="中文内容"></div></div>
+    </div><div class="ic-ops"><button class="btn btn-d btn-sm" data-delmeta="${i}">删</button></div></div>`).join("");
+  const tl = (arr, key) => (arr||[]).map((it,i) =>
+    `<div class="item" data-tl="${key}" data-i="${i}"><div class="ic-body">
+      <div class="row3"><div><input data-time value="${esc(it.time||'')}" placeholder="时间/阶段"></div>
+      <div><input data-title value="${esc(it.title||'')}" placeholder="标题"></div>
+      <div><input data-dot value="${esc(it.dot||'')}" placeholder="dot（current 留空）"></div></div>
+      <label>说明</label><textarea data-desc rows="2">${esc(it.desc||'')}</textarea>
+    </div><div class="ic-ops"><button class="btn btn-d btn-sm" data-deltl="${key}|${i}">删</button></div></div>`).join("");
+  const itm = (arr, key) => (arr||[]).map((it,i) =>
+    `<div class="item" data-itm="${key}" data-i="${i}"><div class="ic-body">
+      <div class="row2"><div><input data-num value="${esc(it.num||'')}" placeholder="编号/小标题"></div>
+      <div><input data-title value="${esc(it.title||'')}" placeholder="标题"></div></div>
+      <label>说明</label><textarea data-desc rows="2">${esc(it.desc||'')}</textarea>
+    </div><div class="ic-ops"><button class="btn btn-d btn-sm" data-delitm="${key}|${i}">删</button></div></div>`).join("");
+
+  const photoGroups = (fb.photos||{groups:[]}).groups.map((g,gi) =>
+    `<div class="card" data-pg="${gi}"><h3>照片分类：${esc(g.cat||'')} <span class="ct">上传后自动保存</span></h3>
+      <div class="gallery">${(g.items||[]).map((it,ii) =>
+        `<div class="g-item"><img src="${esc(it.src)}" alt=""><div class="g-cap"><input value="${esc(it.cap||'')}" data-cap placeholder="说明" style="padding:4px 6px;font-size:11px"></div>
+         <button class="g-del" data-delphoto="${gi}|${ii}">×</button></div>`).join("")}
+      </div>
+      <div class="upload-zone" data-uploadphoto="${gi}">点击上传照片（可多选）<input type="file" accept="image/*" multiple></div>
+    </div>`).join("");
+
+  const workGroups = (fb.works||{groups:[]}).groups.map((g,gi) =>
+    `<div class="card" data-wg="${gi}"><h3>作品分类：${esc(g.cat||'')} <span class="ct">上传后自动保存</span></h3>
+      <div class="gallery">${(g.items||[]).map((it,ii) =>
+        `<div class="g-item"><img src="${esc(it.src)}" alt=""><div class="g-cap"><input value="${esc(it.cap||'')}" data-cap placeholder="说明" style="padding:4px 6px;font-size:11px"></div>
+         <button class="g-del" data-delwork="${gi}|${ii}">×</button></div>`).join("")}
+      </div>
+      <div class="upload-zone" data-uploadwork="${gi}">点击上传作品（可多选）<input type="file" accept="image/*" multiple></div>
+    </div>`).join("");
+
+  setView("创始人管理", "修改姓名、经历、理念、照片、作品等。保存后「关于创始人」页自动更新。", `
+  <div class="card"><h3>创始人信息 <span class="ct">支持多位创始人，并排显示在前台页头</span></h3>
+    <div id="fPros">
+    ${(FB.profiles||[]).map((pr,pi) => `
+      <div class="item" data-pro="${pi}" style="flex-direction:column;align-items:stretch;gap:10px">
+        <div class="bar"><b>创始人 ${pi+1}</b><span class="sp"></span><button class="btn btn-d btn-sm" data-delpro="${pi}">删除</button></div>
+        <div class="row2">
+          <div><label>姓名</label><input data-pname value="${esc(pr.name||'')}"></div>
+          <div><label>性别</label><input data-pgender value="${esc(pr.gender||'')}" placeholder="男/女"></div>
+        </div>
+        <div class="row2">
+          <div><label>联系电话</label><input data-pphone value="${esc(pr.phone||'')}"></div>
+          <div><label>头像照片</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <img data-ppreview src="${esc(pr.photo||'')}" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid var(--line);${pr.photo ? '' : 'opacity:.25'}">
+              <input data-pphoto value="${esc(pr.photo||'')}" placeholder="上传或粘贴地址" style="flex:1">
+              <button class="btn btn-sm" data-uploadpro="${pi}" type="button">上传</button>
+              <input type="file" accept="image/*" id="proinp-${pi}" data-proinp="${pi}" style="display:none">
+            </div>
+          </div>
+        </div>
+        <label>个人简介（一句话）</label><textarea data-pbio rows="2">${esc(pr.bio||'')}</textarea>
+      </div>`).join("")}
+    </div>
+    <div class="actions"><button class="btn btn-sm" id="addPro">+ 加一位创始人</button></div>
+  </div>
+
+  <div class="card"><h3>SEO 与页头</h3>
+    <label>页面 Title</label><input data-path="metaTitle">
+    <label>页面 Description</label><textarea data-path="metaDescription" rows="2"></textarea>
+    <div class="row2">
+      ${fRow("页头大标题", `<input data-path="hero.title">`)}
+      ${fRow("页头副标", `<input data-path="hero.sub">`)}
+    </div>
+    <label>页头简介</label><textarea data-path="hero.intro" rows="3"></textarea>
+    <div class="row2">
+      ${fRow("创始人照片", `<input data-path="hero.photo">`)}
+      ${fRow("照片 Alt", `<input data-path="hero.photoAlt">`)}
+    </div>
+    <label>页头小标签（i=英文 b=中文）</label>
+    <div class="item-list" id="fMeta">${meta}</div>
+    <div class="actions"><button class="btn btn-sm" id="addMeta">+ 加一条标签</button></div>
+  </div>
+
+  <div class="card"><h3>教育背景</h3>
+    <div class="row2">
+      ${fRow("小标题", `<input data-path="edu.kicker">`)}
+      ${fRow("大标题", `<input data-path="edu.title">`)}
+    </div>
+    <div class="item-list" id="fEdu">${tl(fb.edu&&fb.edu.timeline, "edu")}</div>
+    <div class="actions"><button class="btn btn-sm" id="addEdu">+ 加一条经历</button></div>
+  </div>
+
+  <div class="card"><h3>教学经历</h3>
+    <div class="row2">
+      ${fRow("小标题", `<input data-path="exp.kicker">`)}
+      ${fRow("大标题", `<input data-path="exp.title">`)}
+    </div>
+    <div class="item-list" id="fExp">${tl(fb.exp&&fb.exp.timeline, "exp")}</div>
+    <div class="actions"><button class="btn btn-sm" id="addExp">+ 加一条经历</button></div>
+  </div>
+
+  <div class="card"><h3>教学理念</h3>
+    <div class="row2">
+      ${fRow("小标题", `<input data-path="idea1.kicker">`)}
+      ${fRow("大标题", `<input data-path="idea1.title">`)}
+    </div>
+    <label>说明</label><textarea data-path="idea1.sub" rows="2"></textarea>
+    <div class="item-list" id="fI1">${itm((fb.idea1||{}).items, "i1")}</div>
+    <div class="actions"><button class="btn btn-sm" id="addI1">+ 加一条</button></div>
+    <div class="row2" style="margin-top:14px">
+      ${fRow("理念金句", `<input data-path="idea1.quote">`)}
+      ${fRow("金句落款", `<input data-path="idea1.quoteSub">`)}
+    </div>
+  </div>
+
+  <div class="card"><h3>为什么创办</h3>
+    <div class="row2">
+      ${fRow("小标题", `<input data-path="idea2.kicker">`)}
+      ${fRow("大标题", `<input data-path="idea2.title">`)}
+    </div>
+    <div class="item-list" id="fI2">${itm((fb.idea2||{}).items, "i2")}</div>
+    <div class="actions"><button class="btn btn-sm" id="addI2">+ 加一条</button></div>
+  </div>
+
+  <div class="card"><h3>创始人故事（富文本）</h3>
+    <div class="row2">
+      ${fRow("小标题", `<input data-path="story.kicker">`)}
+      ${fRow("大标题", `<input data-path="story.title">`)}
+    </div>
+    <label>正文（支持 HTML 标签：&lt;p&gt; &lt;b&gt; &lt;i&gt; &lt;ul&gt;&lt;li&gt; &lt;blockquote&gt; &lt;br&gt;）</label>
+    <textarea data-path="story.body" rows="10" style="font-family:monospace;font-size:12.5px"></textarea>
+  </div>
+
+  <h3 style="margin:22px 0 10px">创始人照片</h3>
+  ${photoGroups}
+
+  <h3 style="margin:22px 0 10px">创始人作品</h3>
+  <div class="card"><div class="row2">
+    ${fRow("作品区小标题", `<input data-path="works.kicker">`)}
+    ${fRow("作品区大标题", `<input data-path="works.title">`)}
+  </div>
+  <label>作品区说明</label><input data-path="works.sub">
+  </div>
+  ${workGroups}
+
+  <div class="card"><h3>底部行动区</h3>
+    <div class="row2">
+      ${fRow("标题", `<input data-path="cta.title">`)}
+      ${fRow("按钮文字", `<input data-path="cta.btn">`)}
+    </div>
+    <label>说明</label><textarea data-path="cta.sub" rows="2"></textarea>
+  </div>
+
+  <div class="actions"><button class="btn btn-p" id="fbSave" style="padding:10px 30px">保存全部并同步前台</button></div>
+  `);
+
+  // 回填简单字段
+  bindForm($("#view"), fb);
+  // 动态创始人增删
+  $("#addPro").onclick = () => {
+    FB.profiles.push({name:"",gender:"",phone:"",photo:"",photoAlt:"青藤画室创始人",bio:""});
+    founderView();
+  };
+  $$("[data-delpro]").forEach(b => b.onclick = () => {
+    if (!confirmDel("删除这位创始人？")) return;
+    FB.profiles.splice(Number(b.dataset.delpro),1);
+    founderView();
+  });
+  // 创始人头像上传
+  $$("[data-uploadpro]").forEach(btn => btn.onclick = () => {
+    const pi = btn.dataset.uploadpro;
+    $("#proinp-" + pi).click();
+  });
+  $$("[data-proinp]").forEach(inp => inp.onchange = async () => {
+    const pi = Number(inp.dataset.proinp);
+    try {
+      const urls = await uploadFiles(inp.files, "founder");
+      if (urls && urls[0]) {
+        FB.profiles[pi].photo = urls[0];
+        const card = inp.closest("[data-pro]");
+        card.querySelector("[data-pphoto]").value = urls[0];
+        const pv = card.querySelector("[data-ppreview]");
+        pv.src = urls[0]; pv.style.opacity = "1";
+        toast("头像已上传，点保存按钮生效");
+      }
+    } catch (e) { toast(e.message, true); }
+  });
+
+  // 数组编辑器：增删
+  const addRow = (boxId, tplHtml) => { const b = $("#"+boxId); b.insertAdjacentHTML("beforeend", tplHtml); };
+  $("#addMeta").onclick = () => addRow("fMeta", `<div class="item"><div class="ic-body"><div class="row2"><div><input placeholder="英文小标"></div><div><input placeholder="中文内容"></div></div></div></div>`);
+  $("#addEdu").onclick = () => addRow("fEdu", `<div class="item"><div class="ic-body"><div class="row3"><div><input placeholder="时间"></div><div><input placeholder="标题"></div><div><input placeholder="dot"></div></div><textarea rows="2" placeholder="说明"></textarea></div></div>`);
+  $("#addExp").onclick = () => addRow("fExp", `<div class="item"><div class="ic-body"><div class="row3"><div><input placeholder="时间"></div><div><input placeholder="标题"></div><div><input placeholder="dot"></div></div><textarea rows="2" placeholder="说明"></textarea></div></div>`);
+  $("#addI1").onclick = () => addRow("fI1", `<div class="item"><div class="ic-body"><div class="row2"><div><input placeholder="编号"></div><div><input placeholder="标题"></div></div><textarea rows="2" placeholder="说明"></textarea></div></div>`);
+  $("#addI2").onclick = () => addRow("fI2", `<div class="item"><div class="ic-body"><div class="row2"><div><input placeholder="编号"></div><div><input placeholder="标题"></div></div><textarea rows="2" placeholder="说明"></textarea></div></div>`);
+
+  // 删除委托
+  $("#view").onclick = (e) => {
+    const del = e.target.closest("[data-deltl],[data-delitm],[data-delmeta]");
+    if (del) { del.closest(".item").remove(); }
+  };
+
+  // 照片上传
+  $$("[data-uploadphoto]").forEach(zone => {
+    const gi = zone.dataset.uploadphoto;
+    const inp = zone.querySelector("input[type=file]");
+    zone.onclick = (e) => { if (e.target.tagName !== "INPUT") inp.click(); };
+    inp.onchange = async () => {
+      try {
+        const urls = await uploadFiles(inp.files, "founder", (u,i,n)=>toast(`上传中 ${i}/${n}`));
+        for (const url of urls) {
+          FB.photos.groups[gi].items.push({src:url, alt:"", cap:""});
+        }
+        await saveData("fabout", FB, `照片已上传（${urls.length} 张）`);
+        founderView();
+      } catch (err) { toast(err.message, true); }
+    };
+  });
+  // 作品上传
+  $$("[data-uploadwork]").forEach(zone => {
+    const gi = zone.dataset.uploadwork;
+    const inp = zone.querySelector("input[type=file]");
+    zone.onclick = (e) => { if (e.target.tagName !== "INPUT") inp.click(); };
+    inp.onchange = async () => {
+      try {
+        const urls = await uploadFiles(inp.files, "founder", (u,i,n)=>toast(`上传中 ${i}/${n}`));
+        for (const url of urls) {
+          FB.works.groups[gi].items.push({src:url, alt:"", cap:""});
+        }
+        await saveData("fabout", FB, `作品已上传（${urls.length} 张）`);
+        founderView();
+      } catch (err) { toast(err.message, true); }
+    };
+  });
+  // 删除照片/作品
+  $$("[data-delphoto]").forEach(b => b.onclick = async () => {
+    if (!confirmDel("删除这张照片？")) return;
+    const [gi,ii] = b.dataset.delphoto.split("|").map(Number);
+    FB.photos.groups[gi].items.splice(ii,1);
+    await saveData("fabout", FB, "照片已删除");
+    founderView();
+  });
+  $$("[data-delwork]").forEach(b => b.onclick = async () => {
+    if (!confirmDel("删除这件作品？")) return;
+    const [gi,ii] = b.dataset.delwork.split("|").map(Number);
+    FB.works.groups[gi].items.splice(ii,1);
+    await saveData("fabout", FB, "作品已删除");
+    founderView();
+  });
+  // 照片/作品说明同步
+  $$("[data-cap]").forEach(inp => inp.onchange = async () => {
+    const gItem = inp.closest("[data-pg],[data-wg]");
+    const isPhoto = gItem.hasAttribute("data-pg");
+    const gi = (isPhoto ? gItem.dataset.pg : gItem.dataset.wg);
+    const card = inp.closest(".g-item");
+    const ii = Array.from(gItem.querySelectorAll(".g-item")).indexOf(card);
+    const arr = (isPhoto ? FB.photos.groups[gi].items : FB.works.groups[gi].items);
+    if (arr[ii]) { arr[ii].cap = inp.value; arr[ii].alt = inp.value; }
+  });
+
+  // 保存全部
+  $("#fbSave").onclick = async () => {
+    const f = collectForm($("#view"));
+    // 合并到 FB（保留未在表单中的字段）
+    const merge = (dst, src) => { for (const k in src) { if (src[k] && typeof src[k]==="object" && !Array.isArray(src[k])) merge(dst[k]||(dst[k]={}), src[k]); else dst[k]=src[k]; } };
+    merge(FB, f);
+    // 收集 meta
+    FB.hero.meta = $$("#fMeta .item").map(el => {
+      const ins = el.querySelectorAll("input");
+      return {i: ins[0].value, b: ins[1].value};
+    });
+    // 收集 timeline
+    const collectTl = (boxSel, key) => $$(boxSel+" .item").map(el => ({
+      time: el.querySelector("[data-time]").value,
+      title: el.querySelector("[data-title]").value,
+      desc: el.querySelector("[data-desc]").value,
+      dot: el.querySelector("[data-dot]").value
+    }));
+    FB.profiles = $$("#fPros [data-pro]").map(el => ({
+      name: el.querySelector("[data-pname]").value,
+      gender: el.querySelector("[data-pgender]").value,
+      phone: el.querySelector("[data-pphone]").value,
+      photo: el.querySelector("[data-pphoto]").value,
+      photoAlt: "青藤画室创始人",
+      bio: el.querySelector("[data-pbio]").value
+    }));
+    FB.edu.timeline = collectTl("#fEdu","edu");
+    FB.exp.timeline = collectTl("#fExp","exp");
+    FB.idea1.items = $$("#fI1 .item").map(el => ({
+      num: el.querySelector("[data-num]").value,
+      title: el.querySelector("[data-title]").value,
+      desc: el.querySelector("[data-desc]").value
+    }));
+    FB.idea2.items = $$("#fI2 .item").map(el => ({
+      num: el.querySelector("[data-num]").value,
+      title: el.querySelector("[data-title]").value,
+      desc: el.querySelector("[data-desc]").value
+    }));
+    try { await saveData("fabout", FB, "已保存，「关于创始人」页已同步更新"); }
+    catch (e) { toast(e.message, true); }
+  };
+}
+
+/* ================= 视图：首页教师介绍 ================= */
+let TC = null;
+VIEWS.teacher = async () => {
+  TC = await loadData("teacher");
+  const t = TC;
+  const exps = (t.exps||[]).map((e,i) =>
+    `<div class="item"><div class="ic-body"><div class="row2"><div><input data-enum value="${esc(e.num||'')}" placeholder="如 北京/2年"></div><div><input data-elabel value="${esc(e.label||'')}" placeholder="如 大型美术机构任教"></div></div></div><div class="ic-ops"><button class="btn btn-d btn-sm" data-delexp="${i}">删</button></div></div>`).join("");
+  const paras = (t.paras||[]).map((p,i) =>
+    `<div class="item"><div class="ic-body"><label>段落 ${i+1}</label><textarea data-epara rows="3">${esc(p||'')}</textarea></div><div class="ic-ops"><button class="btn btn-d btn-sm" data-delpara="${i}">删</button></div></div>`).join("");
+  const works = (t.works||[]).map((w,i) =>
+    `<div class="g-item"><img src="${esc(w.src)}" alt=""><button class="g-del" data-delwork="${i}">×</button></div>`).join("");
+
+  setView("首页教师介绍", "修改首页「教师介绍」板块。保存后首页自动重新生成。", `
+  <div class="card"><h3>主照片与标语</h3>
+    <label>教师照片（竖版）</label>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+      <img id="tPrev" src="${esc(t.photo||'')}" style="width:80px;height:100px;object-fit:cover;border:1px solid var(--line);border-radius:4px">
+      <input data-tphoto value="${esc(t.photo||'')}" placeholder="上传或粘贴地址" style="flex:1">
+      <button class="btn btn-sm" id="tUpBtn" type="button">上传</button>
+      <input type="file" accept="image/*" id="tUp" style="display:none">
+    </div>
+    <div class="row2"><div><label>照片 Alt</label><input data-talt value="${esc(t.photoAlt||'')}"></div></div>
+    <label>主标语（一句话，加粗在页面上突出）</label><textarea data-tlead rows="2">${esc(t.lead||'')}</textarea>
+  </div>
+
+  <div class="card"><h3>经历标签 <span class="ct">显示在照片下方</span></h3>
+    <div class="item-list" id="tExps">${exps}</div>
+    <div class="actions"><button class="btn btn-sm" id="addExp">+ 加一条经历</button></div>
+  </div>
+
+  <div class="card"><h3>正文段落</h3>
+    <div class="item-list" id="tParas">${paras}</div>
+    <div class="actions"><button class="btn btn-sm" id="addPara">+ 加一段</button></div>
+  </div>
+
+  <div class="card"><h3>创始人作品选 <span class="ct">显示在教师介绍下方</span></h3>
+    <div class="gallery" id="tWorks">${works}</div>
+    <div class="upload-zone" id="tWorkZone">点击上传作品（可多选）<input type="file" accept="image/*" multiple id="tWorkInp"></div>
+  </div>
+
+  <div class="actions"><button class="btn btn-p" id="tSave" style="padding:10px 30px">保存并同步首页</button></div>
+  `);
+
+  $("#addExp").onclick = () => {
+    $("#tExps").insertAdjacentHTML("beforeend", `<div class="item"><div class="ic-body"><div class="row2"><div><input placeholder="如 北京/2年"></div><div><input placeholder="标签"></div></div></div></div>`);
+  };
+  $("#addPara").onclick = () => {
+    $("#tParas").insertAdjacentHTML("beforeend", `<div class="item"><div class="ic-body"><textarea rows="3" placeholder="段落正文"></textarea></div></div>`);
+  };
+  $("#view").onclick = (e) => {
+    const d = e.target.closest("[data-delexp],[data-delpara]");
+    if (d) d.closest(".item").remove();
+  };
+  // 照片上传
+  $("#tUpBtn").onclick = () => $("#tUp").click();
+  $("#tUp").onchange = async () => {
+    try {
+      const urls = await uploadFiles($("#tUp").files, "founder");
+      if (urls && urls[0]) {
+        TC.photo = urls[0];
+        $("[data-tphoto]").value = urls[0];
+        $("#tPrev").src = urls[0];
+        toast("照片已上传，点保存生效");
+      }
+    } catch (err) { toast(err.message, true); }
+  };
+  // 作品上传
+  $("#tWorkZone").onclick = (e) => { if (e.target.tagName !== "INPUT") $("#tWorkInp").click(); };
+  $("#tWorkInp").onchange = async () => {
+    try {
+      const urls = await uploadFiles($("#tWorkInp").files, "founder");
+      for (const u of urls) TC.works.push({src:u, alt:""});
+      await saveData("teacher", TC, "作品已上传");
+      VIEWS.teacher();
+    } catch (err) { toast(err.message, true); }
+  };
+  // 删除作品
+  $$("[data-delwork]").forEach(b => b.onclick = async () => {
+    if (!confirmDel("删除这件作品？")) return;
+    TC.works.splice(Number(b.dataset.delwork),1);
+    await saveData("teacher", TC, "作品已删除");
+    VIEWS.teacher();
+  });
+  // 保存
+  $("#tSave").onclick = async () => {
+    TC.photo = $("[data-tphoto]").value;
+    TC.photoAlt = $("[data-talt]").value;
+    TC.lead = $("[data-tlead]").value;
+    TC.exps = $$("#tExps .item").map(el => {
+      const ins = el.querySelectorAll("input");
+      return {num: ins[0].value, label: ins[1].value};
+    });
+    TC.paras = $$("#tParas .item").map(el => el.querySelector("textarea").value);
+    try { await saveData("teacher", TC, "已保存，首页教师介绍已更新"); }
+    catch (e) { toast(e.message, true); }
+  };
+}
+
+/* ================= 视图：首页内容 ================= */
+VIEWS.site = async function () {
+  const s = await loadData("site");
+  const c = s.contact || {};
+  setView("首页内容", "修改标题、宣传语、联系方式等。保存后前台首页自动重新生成。", `
+  <div class="card">
+    <h3>基本信息与 SEO <span class="ct">出现在浏览器标题与搜索引擎结果中</span></h3>
+    <div class="row2">
+      <div><label>机构名称</label><input data-path="orgName"></div>
+      <div><label>品牌副标（页脚）</label><input data-path="brandSub"></div>
+    </div>
+    <label>首页标题 Title</label><input data-path="metaTitle">
+    <label>首页描述 Meta Description</label><textarea data-path="metaDescription" rows="3"></textarea>
+    <label>关键词 Keywords（逗号分隔）</label><textarea data-path="metaKeywords" rows="3"></textarea>
+    <div class="row2">
+      <div><label>分享标题（og:title）</label><input data-path="ogTitle"></div>
+      <div><label>分享描述（og:description）</label><input data-path="ogDescription"></div>
+    </div>
+    <div class="actions"><button class="btn btn-p" data-save>保存首页信息</button><span class="hint">修改 Title/描述后建议到「重建全站」确认生成无误</span></div>
+  </div>
+  <div class="card">
+    <h3>首页大 Banner（Hero）</h3>
+    <div class="row2">
+      <div><label>主标题</label><input data-path="hero.title"></div>
+      <div><label>副标题</label><input data-path="hero.thin"></div>
+    </div>
+    <label>宣传语</label><input data-path="hero.sub">
+    <label>宣传语加粗部分（需与上方宣传语中的某段文字一致）</label><input data-path="hero.subBold">
+    <div class="row3">
+      <div><label>标签行</label><input data-path="hero.tag"></div>
+      <div><label>按钮一</label><input data-path="hero.cta1"></div>
+      <div><label>按钮二</label><input data-path="hero.cta2"></div>
+    </div>
+    <div class="actions"><button class="btn btn-p" data-save>保存 Banner</button></div>
+  </div>
+  <div class="card">
+    <h3>联系方式</h3>
+    <div class="row2">
+      <div><label>地址</label><input data-path="contact.address"></div>
+      <div><label>地址备注</label><input data-path="contact.addressNote"></div>
+    </div>
+    <div class="row2">
+      <div><label>联系电话（可先填占位，正式号码出来后替换）</label><input data-path="contact.phone"></div>
+      <div><label>电话备注</label><input data-path="contact.phoneNote"></div>
+    </div>
+    <div class="row2">
+      <div><label>营业/咨询时间</label><input data-path="contact.hours"></div>
+      <div><label>高德地图导航链接</label><input data-path="contact.gaodeUrl"></div>
+    </div>
+    <div class="row2">
+      <div><label>百度地图导航链接</label><input data-path="contact.baiduUrl"></div>
+      <div><label>课程方向（第一行）</label><input data-path="contact.courseLine"></div>
+    </div>
+    <div class="row2">
+      <div><label>课程方向（第二行）</label><input data-path="contact.courseLine2"></div>
+      <div><label>微信提示文案</label><input data-path="contact.wechatText"></div>
+    </div>
+    <div class="row2">
+      <div><label>二维码占位文字</label><input data-path="contact.wechatPlaceholder"></div>
+      <div><label>二维码备注</label><input data-path="contact.wechatNote"></div>
+    </div>
+    <div class="actions"><button class="btn btn-p" data-save>保存联系方式</button></div>
+  </div>
+  <div class="card">
+    <h3>微信二维码 <span class="ct">支持两个：老师微信 + 画室微信</span></h3>
+    <div style="display:flex;gap:18px;flex-wrap:wrap">
+      <div style="border:1px solid var(--line);border-radius:6px;padding:14px;flex:1;min-width:210px">
+        <label>二维码1 说明文字</label><input data-path="contact.wechatLabel1" style="margin-bottom:8px">
+        <div style="display:flex;gap:12px;align-items:center">
+          <img data-wxpreview1 style="width:92px;height:92px;object-fit:contain;border:1px solid var(--line);border-radius:4px;background:#fff" alt="二维码1">
+          <div>
+            <button class="btn btn-sm" id="wxUploadBtn1">上传二维码1</button><input type="file" id="wxUploadInput1" accept="image/*" style="display:none">
+            <div style="margin-top:6px"><button class="btn btn-d btn-sm" id="wxClearBtn1">清除</button></div>
+          </div>
+        </div>
+      </div>
+      <div style="border:1px solid var(--line);border-radius:6px;padding:14px;flex:1;min-width:210px">
+        <label>二维码2 说明文字</label><input data-path="contact.wechatLabel2" style="margin-bottom:8px">
+        <div style="display:flex;gap:12px;align-items:center">
+          <img data-wxpreview2 style="width:92px;height:92px;object-fit:contain;border:1px solid var(--line);border-radius:4px;background:#fff" alt="二维码2">
+          <div>
+            <button class="btn btn-sm" id="wxUploadBtn2">上传二维码2</button><input type="file" id="wxUploadInput2" accept="image/*" style="display:none">
+            <div style="margin-top:6px"><button class="btn btn-d btn-sm" id="wxClearBtn2">清除</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:8px">上传后自动保存并同步前台。建议使用清晰的 PNG/JPG 二维码图片。</div>
+  </div>
+  <div class="card">
+    <h3>页脚与 Schema 预留位</h3>
+    <label>页脚简介</label><textarea data-path="footer.about" rows="4"></textarea>
+    <div class="row2">
+      <div><label>官网线上地址 url（Schema 用，发布后填写）</label><input data-path="footer.schemaUrl" placeholder="https://…"></div>
+      <div><label>邮编 postalCode（Schema 用）</label><input data-path="footer.postalCode"></div>
+    </div>
+    <div class="row2">
+      <div><label>页脚左文案</label><input data-path="footer.bottomLeft"></div>
+      <div><label>页脚右文案</label><input data-path="footer.bottomRight"></div>
+    </div>
+    <div class="actions"><button class="btn btn-p" data-save>保存页脚</button></div>
+  </div>
+  <div class="card">
+    <h3>白皮书表单（免费领取升学规划白皮书）</h3>
+    <div class="row2">
+      <div><label>左上角标签</label><input data-path="wp.kicker"></div>
+      <div><label>标题（含 <em> 的部分单独填）</label><input data-path="wp.title"></div>
+    </div>
+    <div class="row2">
+      <div><label>标题强调部分</label><input data-path="wp.em"></div>
+      <div><label>表单标题</label><input data-path="wp.formTitle"></div>
+    </div>
+    <div class="row2">
+      <div><label>表单说明</label><input data-path="wp.formSub"></div>
+      <div><label>底部小字说明</label><input data-path="wp.note"></div>
+    </div>
+    <label>白皮书要点（每行一条）</label><textarea data-path="wp.points" rows="4"></textarea>
+    <div class="actions"><button class="btn btn-p" data-save>保存白皮书模块</button></div>
+  </div>`);
+  const wp = await loadData("whitepaper");
+  s.wp = wp;
+  bindForm($("#view"), s);
+  const pre = () => { const o = collectForm($("#view")); const { wp: w, ...rest } = o; return { rest, w }; };
+  $$("#view [data-save]").forEach(btn => btn.addEventListener("click", async () => {
+    const { rest, w } = pre();
+    try {
+      await saveData("site", rest, "首页信息已保存，前台已同步");
+      await saveData("whitepaper", w);
+      toast("首页信息与白皮书模块均已保存");
+    } catch (e) { toast(e.message, true); }
+  }));
+  const _setPrev = (sel, u) => { const im = $(sel); im.src = u || ""; im.style.opacity = u ? "1" : ".25"; };
+  _setPrev("[data-wxpreview1]", c.wechatImg1 || c.wechatImg || "");
+  _setPrev("[data-wxpreview2]", c.wechatImg2 || "");
+  function _wireQr(btn, inp, field, prev, label) {
+    $(btn).addEventListener("click", () => $(inp).click());
+    $(inp).addEventListener("change", async () => {
+      const f = $(inp).files[0]; if (!f) return;
+      try {
+        const url = (await uploadFiles([f], "site"))[0];
+        const cur = await loadData("site");
+        cur.contact[field] = url;
+        await saveData("site", cur, label + "已更新");
+        _setPrev(prev, url); toast(label + "已保存并同步前台");
+      } catch (e) { toast(e.message, true); }
+    });
+  }
+  function _wireClear(btn, field, prev, label) {
+    $(btn).addEventListener("click", async () => {
+      if (!confirmDel("清除" + label + "？")) return;
+      const cur = await loadData("site");
+      cur.contact[field] = "";
+      await saveData("site", cur, label + "已清除");
+      _setPrev(prev, ""); toast("已清除");
+    });
+  }
+  _wireQr("#wxUploadBtn1","#wxUploadInput1","wechatImg1","[data-wxpreview1]","二维码1");
+  _wireQr("#wxUploadBtn2","#wxUploadInput2","wechatImg2","[data-wxpreview2]","二维码2");
+  _wireClear("#wxClearBtn1","wechatImg1","[data-wxpreview1]","二维码1");
+  _wireClear("#wxClearBtn2","wechatImg2","[data-wxpreview2]","二维码2");
+};
+
+/* ================= 视图：课程管理 ================= */
+let COURSES = [];
+function coursesView() {
+  const list = COURSES.map((c, i) => `
+    <div class="item">
+      <div class="ic-body">
+        <div class="ic-t">${esc(c.num)} ${esc(c.name)} <span class="badge">${esc(c.tag)}</span></div>
+        <div class="ic-s">${esc(c.desc)}</div>
+        <div class="ic-s">${(c.points || []).map(esc).join(" · ")}</div>
+      </div>
+      <div class="ic-ops">
+        <button class="btn btn-sm" data-up="${i}" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-sm" data-down="${i}" ${i === COURSES.length - 1 ? "disabled" : ""}>↓</button>
+        <button class="btn btn-sm" data-edit="${i}">编辑</button>
+        <button class="btn btn-sm btn-d" data-del="${i}">删除</button>
+      </div>
+    </div>`).join("");
+  setView("课程管理", "新增、修改、删除课程，调整展示顺序（排序后点「保存排序」）。保存后前台课程区自动更新。",
+    `<div class="card"><h3>当前课程（${COURSES.length}）</h3>
+      <div class="item-list">${list || '<div class="empty">暂无课程</div>'}</div>
+      <div class="actions"><button class="btn btn-p" id="saveOrder">保存排序</button><span class="hint">顺序从上到下即前台展示顺序</span></div>
+    </div>
+    <div class="card" id="courseForm"><h3 id="cfTitle">新增课程</h3>
+      <div class="row3">
+        <div><label>序号（如 01）</label><input id="cfNum"></div>
+        <div><label>标签（如 4–12岁）</label><input id="cfTag"></div>
+        <div><label>课程名称</label><input id="cfName"></div>
+      </div>
+      <label>课程介绍</label><textarea id="cfDesc" rows="3"></textarea>
+      <label>课程要点（每行一条）</label><textarea id="cfPoints" rows="4"></textarea>
+      <div class="actions">
+        <button class="btn btn-p" id="cfSave">保存课程</button>
+        <button class="btn" id="cfCancel" style="display:none">取消编辑</button>
+      </div>
+    </div>`);
+  let editing = -1;
+  $("#saveOrder").addEventListener("click", async () => {
+    try { await saveData("courses", COURSES, "课程顺序已保存"); } catch (e) { toast(e.message, true); }
+  });
+  $$(".item [data-up]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.up; [COURSES[i-1], COURSES[i]] = [COURSES[i], COURSES[i-1]]; coursesView(); }));
+  $$(".item [data-down]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.down; [COURSES[i+1], COURSES[i]] = [COURSES[i], COURSES[i+1]]; coursesView(); }));
+  $$(".item [data-edit]").forEach(b => b.addEventListener("click", () => {
+    const c = COURSES[+b.dataset.edit];
+    editing = +b.dataset.edit;
+    $("#cfTitle").textContent = "编辑课程：" + c.name;
+    $("#cfNum").value = c.num || ""; $("#cfTag").value = c.tag || ""; $("#cfName").value = c.name || "";
+    $("#cfDesc").value = c.desc || ""; $("#cfPoints").value = (c.points || []).join("\n");
+    $("#cfCancel").style.display = "";
+    $("#courseForm").scrollIntoView({ behavior: "smooth" });
+  }));
+  $$(".item [data-del]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirmDel("删除该课程？")) return;
+    COURSES.splice(+b.dataset.del, 1);
+    await saveData("courses", COURSES, "课程已删除");
+    coursesView();
+  }));
+  $("#cfSave").addEventListener("click", async () => {
+    const obj = { num: $("#cfNum").value.trim(), tag: $("#cfTag").value.trim(), name: $("#cfName").value.trim(),
+      desc: $("#cfDesc").value.trim(), points: $("#cfPoints").value.split("\n").map(s => s.trim()).filter(Boolean) };
+    if (!obj.name) { toast("请填写课程名称", true); return; }
+    if (editing >= 0) COURSES[editing] = { ...COURSES[editing], ...obj };
+    else COURSES.push(obj);
+    await saveData("courses", COURSES, "课程已保存");
+    coursesView();
+  });
+  $("#cfCancel").addEventListener("click", () => coursesView());
+}
+VIEWS.courses = async () => { COURSES = await loadData("courses"); coursesView(); };
+
+/* ================= 视图：学生作品 ================= */
+let WORKS = [];
+const W_CATS = [["child", "儿童画"], ["sketch", "素描"], ["color", "色彩"], ["speed", "速写"], ["create", "创作作品"]];
+function worksView() {
+  const catName = c => { const f = W_CATS.find(x => x[0] === c); return f ? f[1] : c; };
+  const list = WORKS.map((w, i) => `
+    <div class="item">
+      <img class="ic-thumb" src="${esc(w.src)}" alt="">
+      <div class="ic-body">
+        <div class="ic-t">${esc(catName(w.cat))} <span class="badge">${esc(w.ratio || "normal")}</span></div>
+        <div class="ic-s">${esc(w.cap || "")}</div>
+      </div>
+      <div class="ic-ops">
+        <button class="btn btn-sm" data-up="${i}" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-sm" data-down="${i}" ${i === WORKS.length - 1 ? "disabled" : ""}>↓</button>
+        <button class="btn btn-sm" data-edit="${i}">编辑</button>
+        <button class="btn btn-sm btn-d" data-del="${i}">删除</button>
+      </div>
+    </div>`).join("");
+  setView("学生作品", "批量上传作品（一次最多 50 张）、设置分类与描述、调整顺序、删除。保存后前台作品瀑布流自动更新。",
+    `<div class="card">
+      <h3>批量上传作品</h3>
+      <div class="bar">
+        <select id="wCat" style="max-width:180px">
+          ${W_CATS.map(c => '<option value="' + c[0] + '">' + c[1] + "</option>").join("")}
+        </select>
+        <input id="wCap" class="search" placeholder="作品描述（可选，如：8岁学员 · 静物写生）">
+        <button class="btn btn-p" id="wUpBtn">选择图片上传</button>
+        <input type="file" id="wUpInput" multiple accept="image/*" style="display:none">
+        <span class="hint" id="wUpHint"></span>
+      </div>
+      <div class="upload-zone" id="wDrop">点击或拖入图片，支持一次选择 50 张以上 · 上传后自动加入列表，记得点「保存全部」</div>
+      <div id="wPending" class="gallery"></div>
+      <div class="actions"><button class="btn btn-p" id="wSave">保存全部（${WORKS.length} 件）</button><span class="hint">新上传的图片会排在列表末尾，可用 ↑↓ 调整顺序</span></div>
+    </div>
+    <div class="card">
+      <h3>作品列表（${WORKS.length}）</h3>
+      <div class="item-list">${list || '<div class="empty">暂无作品</div>'}</div>
+      <div class="actions"><button class="btn btn-p" id="saveOrder">保存排序</button></div>
+    </div>
+    <div class="card" id="wEditCard" style="display:none">
+      <h3 id="wEditTitle">编辑作品</h3>
+      <img id="wEditImg" style="max-height:240px;border-radius:4px;margin-bottom:8px">
+      <div class="row2">
+        <div><label>分类</label><select id="wEditCat">${W_CATS.map(c => '<option value="' + c[0] + '">' + c[1] + "</option>").join("")}</select></div>
+        <div><label>版式（瀑布流宽高比例）</label><select id="wEditRatio">
+          <option value="normal">标准</option><option value="tall">高（竖长）</option><option value="wide">宽（横长）</option>
+        </select></div>
+      </div>
+      <label>作品描述（前台图下方文字）</label><input id="wEditCap">
+      <label>图片说明 alt（SEO，用于图片搜索）</label><input id="wEditAlt">
+      <div class="actions"><button class="btn btn-p" id="wEditSave">保存修改</button><button class="btn" id="wEditCancel">取消</button></div>
+    </div>`);
+  let pending = [];
+  const renderPending = () => {
+    $("#wPending").innerHTML = pending.map((p, i) => `
+      <div class="g-item">
+        <img src="${esc(p.src)}" alt="">
+        <div class="g-cap">${esc(p.cap || "作品")} <button class="btn btn-sm btn-d" data-pdel="${i}" style="margin-left:6px">移除</button></div>
+      </div>`).join("") || '<div class="empty" style="grid-column:1/-1">等待上传…</div>';
+    $$("#wPending [data-pdel]").forEach(b => b.addEventListener("click", () => { pending.splice(+b.dataset.pdel, 1); renderPending(); }));
+  };
+  const upToPending = async (files) => {
+    if (!files || !files.length) return;
+    $("#wUpBtn").disabled = true;
+    $("#wUpHint").textContent = "上传中 0/" + files.length + " …";
+    try {
+      const urls = await uploadFiles(files, "works", (u, i, n) => { $("#wUpHint").textContent = "上传中 " + i + "/" + n + " …"; });
+      urls.forEach(u => pending.push({ src: u, cat: $("#wCat").value, cap: $("#wCap").value.trim(), alt: "青藤画室学生作品", ratio: "normal" }));
+      renderPending();
+      toast("已加入 " + urls.length + " 件，点击「保存全部」生效");
+    } catch (e) { toast("上传失败：" + e.message, true); }
+    $("#wUpBtn").disabled = false;
+    $("#wUpHint").textContent = "";
+    $("#wUpInput").value = "";
+  };
+  $("#wUpBtn").addEventListener("click", () => $("#wUpInput").click());
+  $("#wUpInput").addEventListener("change", () => upToPending($("#wUpInput").files));
+  ["dragover", "drop"].forEach(ev => $("#wDrop").addEventListener(ev, e => e.preventDefault()));
+  $("#wDrop").addEventListener("drop", e => upToPending(e.dataTransfer.files));
+  $("#wSave").addEventListener("click", async () => {
+    const all = WORKS.concat(pending);
+    try { await saveData("works", all, "作品已保存（共 " + all.length + " 件）"); pending = []; worksView(); }
+    catch (e) { toast(e.message, true); }
+  });
+  $("#saveOrder").addEventListener("click", async () => {
+    try { await saveData("works", WORKS, "作品顺序已保存"); } catch (e) { toast(e.message, true); }
+  });
+  $$(".item [data-up]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.up; [WORKS[i-1], WORKS[i]] = [WORKS[i], WORKS[i-1]]; worksView(); }));
+  $$(".item [data-down]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.down; [WORKS[i+1], WORKS[i]] = [WORKS[i], WORKS[i+1]]; worksView(); }));
+  let editing = -1;
+  $$(".item [data-edit]").forEach(b => b.addEventListener("click", () => {
+    const w = WORKS[+b.dataset.edit]; editing = +b.dataset.edit;
+    $("#wEditCard").style.display = "";
+    $("#wEditTitle").textContent = "编辑作品：" + (w.cap || w.src);
+    $("#wEditImg").src = w.src;
+    $("#wEditCat").value = w.cat || "child";
+    $("#wEditRatio").value = w.ratio || "normal";
+    $("#wEditCap").value = w.cap || "";
+    $("#wEditAlt").value = w.alt || "";
+    $("#wEditCard").scrollIntoView({ behavior: "smooth" });
+  }));
+  $("#wEditSave").addEventListener("click", async () => {
+    if (editing < 0) return;
+    WORKS[editing] = { ...WORKS[editing], cat: $("#wEditCat").value, ratio: $("#wEditRatio").value, cap: $("#wEditCap").value.trim(), alt: $("#wEditAlt").value.trim() };
+    await saveData("works", WORKS, "作品已更新");
+    worksView();
+  });
+  $("#wEditCancel").addEventListener("click", () => worksView());
+  $$(".item [data-del]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirmDel("删除该作品？")) return;
+    WORKS.splice(+b.dataset.del, 1);
+    await saveData("works", WORKS, "作品已删除");
+    worksView();
+  }));
+}
+VIEWS.works = async () => { WORKS = await loadData("works"); worksView(); };
+
+/* ================= 视图：成长案例 ================= */
+let CASES = [];
+const CASE_STEPS = [
+  ["k0", "入学情况"], ["k1", "学习过程"], ["k2", "家长反馈"], ["k3", "最终变化"]
+];
+function casesView() {
+  const list = CASES.map((cs, i) => `
+    <div class="item">
+      <div class="ic-body">
+        <div class="ic-t">${esc(cs.title)} <span class="badge">${esc(cs.tag)}</span></div>
+        <div class="ic-s">${esc(cs.sub)}</div>
+      </div>
+      <div class="ic-ops">
+        <button class="btn btn-sm" data-up="${i}" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-sm" data-down="${i}" ${i === CASES.length - 1 ? "disabled" : ""}>↓</button>
+        <button class="btn btn-sm" data-edit="${i}">编辑</button>
+        <button class="btn btn-sm btn-d" data-del="${i}">删除</button>
+      </div>
+    </div>`).join("");
+  setView("成长案例", "新增、编辑、删除学员成长案例，支持前后对比图片与家长评价。保存后前台「成长故事」页自动更新，可无限增加。",
+    `<div class="card"><h3>案例列表（${CASES.length}）</h3>
+      <div class="item-list">${list || '<div class="empty">暂无案例</div>'}</div>
+      <div class="actions"><button class="btn btn-p" id="saveOrder">保存排序</button></div>
+    </div>
+    <div class="card" id="caseForm"><h3 id="caseTitle">新增案例</h3>
+      <div class="row2">
+        <div><label>标签（如：少儿美术 / 中考美术）</label><input id="cTag"></div>
+        <div><label>标题（如：从不敢下笔到主动画完一整本速写本）</label><input id="cTitle"></div>
+      </div>
+      <div class="row2">
+        <div><label>副标题（一句话概括）</label><input id="cSub"></div>
+        <div><label>前后对比展示</label><select id="cPair"><option value="1">开启（两张图并排对比）</option><option value="0">关闭（单张图）</option></select></div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>图片一（入学前 / 第一张）</label>
+          <div style="display:flex;gap:8px"><img id="cImg0" style="width:90px;height:90px;object-fit:cover;border:1px solid var(--line);border-radius:4px"><input type="file" id="cUp0" accept="image/*" style="width:auto"><button class="btn btn-sm" id="cClear0">清除</button></div>
+        </div>
+        <div>
+          <label>图片二（学习后 / 第二张）</label>
+          <div style="display:flex;gap:8px"><img id="cImg1" style="width:90px;height:90px;object-fit:cover;border:1px solid var(--line);border-radius:4px"><input type="file" id="cUp1" accept="image/*" style="width:auto"><button class="btn btn-sm" id="cClear1">清除</button></div>
+        </div>
+      </div>
+      ${CASE_STEPS.map(s => `
+      <label>${s[1]}</label><textarea id="cStep${s[0].slice(1)}" rows="3" placeholder="${s[1]}…"></textarea>`).join("")}
+      <div class="actions"><button class="btn btn-p" id="cSave">保存案例</button><button class="btn" id="cCancel" style="display:none">取消编辑</button></div>
+    </div>`);
+  let editing = -1;
+  let upUrls = ["", ""];
+  const fillForm = (cs) => {
+    upUrls = [(cs.imgs || [])[0] ? (cs.imgs[0].src || "") : "", (cs.imgs || [])[1] ? (cs.imgs[1].src || "") : ""];
+    $("#cTag").value = cs.tag || ""; $("#cTitle").value = cs.title || ""; $("#cSub").value = cs.sub || "";
+    $("#cPair").value = cs.pair ? "1" : "0";
+    (cs.steps || []).forEach((s, i) => { const el = $("#cStep" + i); if (el) el.value = s.v || ""; });
+    $("#cImg0").src = upUrls[0] || ""; $("#cImg1").src = upUrls[1] || "";
+  };
+  const bindUp = (idx, inputId) => {
+    $("#" + inputId).addEventListener("change", async () => {
+      const f = $("#" + inputId).files[0];
+      if (!f) return;
+      try {
+        const url = (await uploadFiles([f], "cases"))[0];
+        upUrls[idx] = url;
+        $("#cImg" + idx).src = url;
+        toast("图片已上传，保存案例后生效");
+      } catch (e) { toast(e.message, true); }
+    });
+    $("#cClear" + idx).addEventListener("click", () => { upUrls[idx] = ""; $("#cImg" + idx).src = ""; });
+  };
+  bindUp(0, "cUp0"); bindUp(1, "cUp1");
+  $("#saveOrder").addEventListener("click", async () => { try { await saveData("cases", CASES, "案例顺序已保存"); } catch (e) { toast(e.message, true); } });
+  $$(".item [data-up]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.up; [CASES[i-1], CASES[i]] = [CASES[i], CASES[i-1]]; casesView(); }));
+  $$(".item [data-down]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.down; [CASES[i+1], CASES[i]] = [CASES[i], CASES[i+1]]; casesView(); }));
+  $$(".item [data-edit]").forEach(b => b.addEventListener("click", () => {
+    editing = +b.dataset.edit;
+    $("#caseTitle").textContent = "编辑案例";
+    fillForm(CASES[editing]);
+    $("#cCancel").style.display = "";
+    $("#caseForm").scrollIntoView({ behavior: "smooth" });
+  }));
+  $$(".item [data-del]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirmDel("删除该案例？")) return;
+    CASES.splice(+b.dataset.del, 1);
+    await saveData("cases", CASES, "案例已删除");
+    casesView();
+  }));
+  $("#cSave").addEventListener("click", async () => {
+    const imgs = [];
+    if (upUrls[0]) imgs.push({ src: upUrls[0], alt: "青藤画室学员作品变化", cap: "入学时" });
+    if (upUrls[1]) imgs.push({ src: upUrls[1], alt: "青藤画室学员作品变化", cap: "学习后" });
+    const steps = CASE_STEPS.map((s, i) => ({ k: s[0], t: s[1], v: $("#cStep" + i).value.trim() })).filter(s => s.v);
+    const obj = { tag: $("#cTag").value.trim(), title: $("#cTitle").value.trim(), sub: $("#cSub").value.trim(),
+      pair: $("#cPair").value === "1", imgs, steps };
+    if (!obj.title) { toast("请填写案例标题", true); return; }
+    if (editing >= 0) CASES[editing] = { ...CASES[editing], ...obj };
+    else CASES.push(obj);
+    await saveData("cases", CASES, "案例已保存");
+    casesView();
+  });
+  $("#cCancel").addEventListener("click", () => casesView());
+  fillForm({});
+}
+VIEWS.cases = async () => { CASES = await loadData("cases"); casesView(); };
+
+/* ================= 视图：FAQ 管理 ================= */
+let FAQ = [];
+function faqView(q = "") {
+  const kw = q.trim();
+  const list = FAQ.map((f, i) => kw && !(f.q + f.a).includes(kw) ? "" : `
+    <div class="item">
+      <div class="ic-body">
+        <div class="ic-t">${esc(f.q)}</div>
+        <div class="ic-s">${esc(f.a)}</div>
+      </div>
+      <div class="ic-ops">
+        <button class="btn btn-sm" data-up="${i}" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-sm" data-down="${i}" ${i === FAQ.length - 1 ? "disabled" : ""}>↓</button>
+        <button class="btn btn-sm" data-edit="${i}">编辑</button>
+        <button class="btn btn-sm btn-d" data-del="${i}">删除</button>
+      </div>
+    </div>`).join("");
+  setView("常见问题 FAQ", "共 " + FAQ.length + " 条问题（前台展示全部）。新增、编辑、删除、排序，保存后前台 FAQ 与结构化数据自动更新。",
+    `<div class="card">
+      <div class="bar">
+        <input id="fqSearch" class="search" placeholder="搜索问题…">
+        <div class="sp"></div>
+        <button class="btn btn-p" id="fqAdd">+ 新增问题</button>
+        <button class="btn" id="fqSave">保存全部（${FAQ.length}）</button>
+      </div>
+      <div class="item-list" id="fqList">${list || '<div class="empty">没有匹配的问题</div>'}</div>
+      <div class="actions"><button class="btn btn-p" id="fqSaveOrder">保存排序</button><span class="hint">问题数量增加后，首页「家长常问的 N 个问题」数字自动更新</span></div>
+    </div>
+    <div class="card" id="fqForm" style="display:none">
+      <h3 id="fqTitle">新增问题</h3>
+      <label>问题</label><input id="fqQ">
+      <label>答案</label><textarea id="fqA" rows="5"></textarea>
+      <div class="actions"><button class="btn btn-p" id="fqSaveOne">保存</button><button class="btn" id="fqCancelOne">取消</button></div>
+    </div>`);
+  let editing = -1;
+  const showForm = (f) => {
+    $("#fqForm").style.display = "";
+    $("#fqTitle").textContent = editing >= 0 ? "编辑问题" : "新增问题";
+    $("#fqQ").value = f ? f.q : ""; $("#fqA").value = f ? f.a : "";
+    $("#fqForm").scrollIntoView({ behavior: "smooth" });
+  };
+  $("#fqSearch").addEventListener("input", () => faqView($("#fqSearch").value));
+  $("#fqAdd").addEventListener("click", () => { editing = -1; showForm(null); });
+  $("#fqSaveOne").addEventListener("click", () => {
+    const q = $("#fqQ").value.trim(), a = $("#fqA").value.trim();
+    if (!q || !a) { toast("问题和答案都要填写", true); return; }
+    if (editing >= 0) FAQ[editing] = { ...FAQ[editing], q, a };
+    else FAQ.push({ q, a });
+    faqView($("#fqSearch").value);
+  });
+  $("#fqCancelOne").addEventListener("click", () => faqView($("#fqSearch").value));
+  $("#fqSave").addEventListener("click", async () => { try { await saveData("faq", FAQ, "FAQ 已保存"); } catch (e) { toast(e.message, true); } });
+  $("#fqSaveOrder").addEventListener("click", async () => { try { await saveData("faq", FAQ, "FAQ 顺序已保存"); } catch (e) { toast(e.message, true); } });
+  $$("#fqList [data-up]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.up; [FAQ[i-1], FAQ[i]] = [FAQ[i], FAQ[i-1]]; faqView($("#fqSearch").value); }));
+  $$("#fqList [data-down]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.down; [FAQ[i+1], FAQ[i]] = [FAQ[i], FAQ[i+1]]; faqView($("#fqSearch").value); }));
+  $$("#fqList [data-edit]").forEach(b => b.addEventListener("click", () => { editing = +b.dataset.edit; showForm(FAQ[editing]); }));
+  $$("#fqList [data-del]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirmDel("删除该问题？")) return;
+    FAQ.splice(+b.dataset.del, 1);
+    await saveData("faq", FAQ, "问题已删除");
+    faqView($("#fqSearch").value);
+  }));
+}
+VIEWS.faq = async () => { FAQ = await loadData("faq"); faqView(); };
+
+/* ================= 视图：文章管理 ================= */
+let ARTICLES = [];
+let ART_BODIES = {};
+function articlesView() {
+  const list = ARTICLES.map((a, i) => `
+    <div class="item">
+      <div class="ic-body">
+        <div class="ic-t">${esc(a.title)} <span class="badge">${esc(a.cat)}</span> <span class="badge">${esc(a.date)}</span></div>
+        <div class="ic-s">${esc(a.lead)}</div>
+      </div>
+      <div class="ic-ops">
+        <button class="btn btn-sm" data-up="${i}" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-sm" data-down="${i}" ${i === ARTICLES.length - 1 ? "disabled" : ""}>↓</button>
+        <button class="btn btn-sm" data-edit="${i}">编辑</button>
+        <button class="btn btn-sm" data-open="${i}">预览</button>
+        <button class="btn btn-sm btn-d" data-del="${i}">删除</button>
+      </div>
+    </div>`).join("");
+  setView("文章管理", "新增、编辑、删除文章。保存后自动生成文章页：正文中的小标题（h2）会自动生成「本文目录」，文末自动生成相关推荐，并输出 Article 结构化数据利于 AI 搜索引用。",
+    `<div class="card">
+      <div class="bar">
+        <div class="sp"></div>
+        <button class="btn btn-p" id="aAdd">+ 新增文章</button>
+        <button class="btn" id="aSave">保存全部（${ARTICLES.length} 篇）</button>
+      </div>
+      <div class="item-list">${list || '<div class="empty">暂无文章</div>'}</div>
+    </div>
+    <div class="card" id="aForm" style="display:none">
+      <h3 id="aTitle">编辑文章</h3>
+      <div class="row2">
+        <div><label>文章标题</label><input id="aName"></div>
+        <div><label>分类（如：机构选择 / 中考美术 / 高考美术 / 教育理念）</label><input id="aCat"></div>
+      </div>
+      <div class="row3">
+        <div><label>发布日期</label><input id="aDate" placeholder="2026-09-20"></div>
+        <div><label>阅读时长提示（如：约2000字 · 6分钟）</label><input id="aMeta"></div>
+        <div><label>文件名（英文，仅新增时填写，.html）</label><input id="aFile" placeholder="my-new-article"></div>
+      </div>
+      <label>摘要 lead（显示在文章开头与搜索结果）</label><textarea id="aLead" rows="3"></textarea>
+      <label>标签（逗号分隔，用于 SEO 关键词）</label><input id="aTags" placeholder="嘉兴美术培训,少儿美术">
+      <label>正文（HTML 格式。段落用 &lt;p&gt;…&lt;/p&gt;，小标题用 &lt;h2&gt;…&lt;/h2&gt;，会自动生成目录；加粗用 &lt;b&gt;，引用用 &lt;blockquote&gt;）</label>
+      <textarea id="aBody" rows="16" placeholder="<p>正文第一段……</p>&#10;<h2>一、小标题</h2>&#10;<p>正文内容……</p>"></textarea>
+      <div class="actions"><button class="btn btn-p" id="aSaveOne">保存这篇文章</button><button class="btn" id="aCancelOne">取消</button>
+        <span class="hint">保存后需再点「保存全部」生成前台页面</span></div>
+    </div>`);
+  let editing = -1;
+  const showForm = (a) => {
+    $("#aForm").style.display = "";
+    $("#aTitle").textContent = editing >= 0 ? "编辑文章：" + a.title : "新增文章";
+    $("#aName").value = a ? a.title || "" : "";
+    $("#aCat").value = a ? a.cat || "" : "";
+    $("#aDate").value = a ? a.date || "" : "";
+    $("#aMeta").value = a ? a.meta || "" : "";
+    $("#aFile").value = "";
+    $("#aFile").disabled = editing >= 0;
+    $("#aLead").value = a ? a.lead || "" : "";
+    $("#aTags").value = a ? (a.tags || []).join(", ") : "";
+    $("#aBody").value = editing >= 0 && ART_BODIES[a.file] ? ART_BODIES[a.file] : "";
+    $("#aForm").scrollIntoView({ behavior: "smooth" });
+  };
+  const loadBodies = async (file) => {
+    if (ART_BODIES[file] !== undefined) return ART_BODIES[file];
+    const r = await fetch("data/content/articles/" + file);
+    if (r.ok) { ART_BODIES[file] = await r.text(); return ART_BODIES[file]; }
+    return "";
+  };
+  $("#aAdd").addEventListener("click", () => { editing = -1; showForm(null); });
+  $("#aSaveOne").addEventListener("click", async () => {
+    const title = $("#aName").value.trim(), cat = $("#aCat").value.trim(), date = $("#aDate").value.trim() || "2026-09-20";
+    const meta = $("#aMeta").value.trim() || "约2000字 · 6分钟", lead = $("#aLead").value.trim();
+    const tags = $("#aTags").value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    const body = $("#aBody").value;
+    if (!title || !body.trim()) { toast("标题和正文都要填写", true); return; }
+    if (editing >= 0) {
+      ARTICLES[editing] = { ...ARTICLES[editing], title, cat, date, meta, lead, tags };
+      ART_BODIES[ARTICLES[editing].file] = body;
+    } else {
+      let slug = $("#aFile").value.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "") || "article";
+      if (ARTICLES.some(a => a.file === slug + ".html")) slug += "-" + Date.now().toString().slice(-6);
+      const file = slug + ".html";
+      ARTICLES.push({ file, title, cat, date, meta, lead, tags });
+      ART_BODIES[file] = body;
+    }
+    toast("已暂存，请点「保存全部」生成前台页面");
+    articlesView();
+  });
+  $("#aCancelOne").addEventListener("click", () => articlesView());
+  $("#aSave").addEventListener("click", async () => {
+    try {
+      await saveData("articles", { items: ARTICLES, bodies: ART_BODIES }, "文章已保存，前台文章页已生成（含自动目录与相关推荐）");
+    } catch (e) { toast(e.message, true); }
+  });
+  $$(".item [data-up]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.up; [ARTICLES[i-1], ARTICLES[i]] = [ARTICLES[i], ARTICLES[i-1]]; articlesView(); }));
+  $$(".item [data-down]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.down; [ARTICLES[i+1], ARTICLES[i]] = [ARTICLES[i], ARTICLES[i+1]]; articlesView(); }));
+  $$(".item [data-edit]").forEach(b => b.addEventListener("click", async () => {
+    editing = +b.dataset.edit;
+    const a = ARTICLES[editing];
+    if (ART_BODIES[a.file] === undefined) ART_BODIES[a.file] = await loadBodies(a.file);
+    showForm(a);
+  }));
+  $$(".item [data-open]").forEach(b => b.addEventListener("click", () => window.open("articles/" + ARTICLES[+b.dataset.open].file, "_blank")));
+  $$(".item [data-del]").forEach(b => b.addEventListener("click", async () => {
+    if (!confirmDel("删除该文章？前台对应页面将不再生成。")) return;
+    const a = ARTICLES[+b.dataset.del];
+    ARTICLES.splice(+b.dataset.del, 1);
+    delete ART_BODIES[a.file];
+    try { await api("POST", "/api/delete", { url: "" }); } catch (e) {}
+    await saveData("articles", { items: ARTICLES, bodies: ART_BODIES }, "文章已删除");
+    articlesView();
+  }));
+}
+VIEWS.articles = async () => {
+  ARTICLES = await loadData("articles");
+  ART_BODIES = {};
+  articlesView();
+};
+
+/* ================= 视图：升学规划中心 ================= */
+let PLANNING = null;
+let PLAN_IDX = 0;
+function planningView() {
+  const cols = PLANNING.columns || [];
+  const cur = cols[PLAN_IDX] || { posts: [] };
+  const tabs = cols.map((c, i) => `<button class="btn btn-sm" data-tab="${i}" style="${i === PLAN_IDX ? "background:var(--moss);color:#fff;border-color:var(--moss)" : ""}">${esc(c.cn)} ${esc(c.title)}</button>`).join("");
+  const posts = (cur.posts || []).map((p, i) => `
+    <div class="item">
+      <div class="ic-body">
+        <div class="ic-t">${esc(p.title)} <span class="badge">${esc(p.meta)}</span> <span class="badge">${esc(p.meta2)}</span></div>
+        <div class="ic-s">${esc(p.desc)}</div>
+      </div>
+      <div class="ic-ops">
+        <button class="btn btn-sm" data-up="${i}" ${i === 0 ? "disabled" : ""}>↑</button>
+        <button class="btn btn-sm" data-down="${i}" ${i === (cur.posts || []).length - 1 ? "disabled" : ""}>↓</button>
+        <button class="btn btn-sm" data-edit="${i}">编辑</button>
+        <button class="btn btn-sm btn-d" data-del="${i}">删除</button>
+      </div>
+    </div>`).join("");
+  setView("升学规划栏目", "维护「嘉兴美术升学规划中心」各栏目内容：中考美术指南、学校资料、政策解读、分数段规划、零基础时间线。支持持续新增文章。",
+    `<div class="card">
+      <div class="bar">${tabs}</div>
+    </div>
+    <div class="card">
+      <h3>当前栏目：${esc(cur.cn)} ${esc(cur.title)} <span class="ct">${(cur.posts || []).length} 篇</span></h3>
+      <div class="item-list">${posts || '<div class="empty">该栏目暂无内容</div>'}</div>
+      <div class="actions"><button class="btn btn-p" id="pAdd">+ 新增一篇</button><button class="btn" id="pSave">保存此栏目</button></div>
+    </div>
+    <div class="card" id="pForm" style="display:none">
+      <h3 id="pTitle">编辑文章</h3>
+      <div class="row3">
+        <div><label>小标签（如：指南）</label><input id="pMeta"></div>
+        <div><label>状态（如：持续更新 / 已发布）</label><input id="pMeta2"></div>
+        <div><label>链接文字</label><input id="pLinkText" placeholder="阅读全文"></div>
+      </div>
+      <label>标题</label><input id="pName">
+      <label>简介</label><textarea id="pDesc" rows="3"></textarea>
+      <label>要点（每行一条，前台以小圆点展示）</label><textarea id="pPoints" rows="4"></textarea>
+      <label>跳转链接（可填前台文章页地址，如 articles/xxx.html，或填写「#contact」）</label><input id="pLink" placeholder="articles/my-article.html">
+      <div class="actions"><button class="btn btn-p" id="pSaveOne">保存</button><button class="btn" id="pCancelOne">取消</button></div>
+    </div>`);
+  let editing = -1;
+  const showForm = (p) => {
+    $("#pForm").style.display = "";
+    $("#pTitle").textContent = editing >= 0 ? "编辑文章" : "新增文章";
+    $("#pMeta").value = p ? p.meta || "" : "";
+    $("#pMeta2").value = p ? p.meta2 || "" : "";
+    $("#pLinkText").value = p ? p.linkText || "阅读全文" : "阅读全文";
+    $("#pName").value = p ? p.title || "" : "";
+    $("#pDesc").value = p ? p.desc || "" : "";
+    $("#pPoints").value = p ? (p.points || []).join("\n") : "";
+    $("#pLink").value = p ? p.link || "" : "";
+    $("#pForm").scrollIntoView({ behavior: "smooth" });
+  };
+  $$("[data-tab]").forEach(b => b.addEventListener("click", () => { PLAN_IDX = +b.dataset.tab; planningView(); }));
+  $$(".item [data-up]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.up; const ps = cols[PLAN_IDX].posts; [ps[i-1], ps[i]] = [ps[i], ps[i-1]]; planningView(); }));
+  $$(".item [data-down]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.down; const ps = cols[PLAN_IDX].posts; [ps[i+1], ps[i]] = [ps[i], ps[i+1]]; planningView(); }));
+  $$(".item [data-edit]").forEach(b => b.addEventListener("click", () => { editing = +b.dataset.edit; showForm(cols[PLAN_IDX].posts[editing]); }));
+  $$(".item [data-del]").forEach(b => b.addEventListener("click", () => {
+    if (!confirmDel("删除该篇文章？")) return;
+    cols[PLAN_IDX].posts.splice(+b.dataset.del, 1);
+    planningView();
+  }));
+  $("#pAdd").addEventListener("click", () => { editing = -1; showForm(null); });
+  $("#pSaveOne").addEventListener("click", () => {
+    const obj = { meta: $("#pMeta").value.trim(), meta2: $("#pMeta2").value.trim(), title: $("#pName").value.trim(),
+      desc: $("#pDesc").value.trim(), points: $("#pPoints").value.split("\n").map(s => s.trim()).filter(Boolean),
+      link: $("#pLink").value.trim() || "index.html#contact", linkText: $("#pLinkText").value.trim() || "阅读全文" };
+    if (!obj.title) { toast("请填写标题", true); return; }
+    const ps = cols[PLAN_IDX].posts;
+    if (editing >= 0) ps[editing] = { ...ps[editing], ...obj };
+    else ps.push(obj);
+    planningView();
+  });
+  $("#pCancelOne").addEventListener("click", () => planningView());
+  $("#pSave").addEventListener("click", async () => {
+    try { await saveData("planning", PLANNING, "升学规划栏目已保存"); } catch (e) { toast(e.message, true); }
+  });
+}
+VIEWS.planning = async () => {
+  PLANNING = await loadData("planning");
+  PLAN_IDX = 0;
+  planningView();
+};
+
+/* ================= 视图：账号设置 ================= */
+VIEWS.account = () => {
+  setView("账号设置", "修改后台登录密码。",
+    `<div class="card" style="max-width:480px">
+      <h3>修改密码</h3>
+      <label>当前密码</label><input type="password" id="pwOld">
+      <label>新密码（至少 6 位）</label><input type="password" id="pwNew">
+      <label>确认新密码</label><input type="password" id="pwNew2">
+      <div class="actions"><button class="btn btn-p" id="pwBtn">修改密码</button></div>
+      <div class="hint" style="margin-top:10px">建议定期更换密码，并仅告知画室管理员。</div>
+    </div>`);
+  $("#pwBtn").addEventListener("click", async () => {
+    const old = $("#pwOld").value, n1 = $("#pwNew").value, n2 = $("#pwNew2").value;
+    if (!old || !n1) { toast("请填写完整", true); return; }
+    if (n1 !== n2) { toast("两次新密码不一致", true); return; }
+    try {
+      const j = await api("POST", "/api/password", { old, new: n1 });
+      toast(j.message);
+      $("#pwOld").value = $("#pwNew").value = $("#pwNew2").value = "";
+    } catch (e) { toast(e.message, true); }
+  });
+};
+
+/* ================= 视图：使用说明 ================= */
+
+/* ================= 视图：咨询线索 ================= */
+VIEWS.leads = async () => {
+  let data;
+  try { data = await api("GET", "/api/leads"); }
+  catch (e) { data = { leads: [], stats: {} }; }
+  const leads = data.leads || [];
+  const st = data.stats || {};
+  const STATUS = ["未联系", "已联系", "已试听", "已报名", "无意向"];
+
+  const statCard = (label, val, color) => `
+    <div style="flex:1;min-width:120px;background:#FAF8F2;border:1px solid var(--line);border-radius:6px;padding:14px 16px">
+      <div style="font-size:12px;color:var(--ink3)">${label}</div>
+      <div style="font-size:26px;font-weight:700;color:${color||'var(--moss)'};margin-top:2px">${val||0}</div>
+    </div>`;
+
+  const rows = leads.map((l, i) => `
+    <tr>
+      <td><b>${esc(l.name||'')}</b></td>
+      <td>${esc(l.grade||'-')}</td>
+      <td><a href="tel:${esc(l.phone||'')}" style="color:var(--moss);text-decoration:none;font-weight:600" title="点击拨号">${esc(l.phone||'')}</a></td>
+      <td>${esc(l.course||'-')}</td>
+      <td style="max-width:180px"><div style="font-size:12px;color:var(--ink3);line-height:1.5">${esc(l.message||'-')}</div></td>
+      <td>${esc(l.source||'-')}</td>
+      <td>${esc(l.time||'')}</td>
+      <td><select data-status="${i}" style="padding:4px 6px;font-size:12px">
+        ${STATUS.map(x=>`<option value="${x}" ${x===(l.status||'未联系')?'selected':''}>${x}</option>`).join("")}
+      </select></td>
+    </tr>`).join("");
+
+  setView("咨询线索", "所有表单提交自动入库并微信通知。点电话可直接拨号，状态可在右侧下拉修改。", `
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px">
+    ${statCard("今日新增", st.today)}
+    ${statCard("本周新增", st.week)}
+    ${statCard("本月新增", st.month)}
+    ${statCard("未联系", st.untouched, '#A33')}
+    ${statCard("试听预约", st.trial)}
+    ${statCard("白皮书领取", st.whitepaper)}
+  </div>
+  <div class="card">
+    <div class="bar"><b>最近线索（按时间倒序）</b><div class="sp"></div>
+      <button class="btn" id="leadRefresh">刷新</button>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="tbl" style="width:100%;min-width:820px">
+      <thead><tr>
+        <th>称呼</th><th>年级</th><th>电话</th><th>项目</th><th>留言</th><th>来源</th><th>时间</th><th>状态</th>
+      </tr></thead>
+      <tbody>${rows || '<tr><td colspan="8" style="text-align:center;color:#999;padding:24px">暂无线索，家长提交表单后会自动出现在这里</td></tr>'}</tbody>
+    </table>
+    </div>
+  </div>`);
+
+  $("#leadRefresh").addEventListener("click", () => VIEWS.leads());
+  $$("[data-status]").forEach(sel => sel.addEventListener("change", async () => {
+    const l = leads[+sel.dataset.status];
+    try {
+      await api("POST", "/api/lead-status", { id: l.id, status: sel.value });
+      toast("状态已更新为：" + sel.value);
+    } catch (e) { toast(e.message, true); }
+  }));
+};
+
+/* ================= 视图：微信通知设置 ================= */
+VIEWS.settings = async () => {
+  let s;
+  try { s = await loadData("settings"); } catch (e) { s = {}; }
+  s = s || {};
+  const sc = s.serverchan || {};
+  const pp = s.pushplus || {};
+  const wc = s.wecom || {};
+  const ch = s.notifyChannel || "serverchan";
+  setView("微信通知设置", "家长提交表单后，微信立即收到提醒。先选渠道，再填对应 Key/Token/Webhook，保存后立即生效。", `
+  <div class="card">
+    <h3>选择通知渠道 <span class="ct">推荐 Server酱，最稳定、免费、接入最快</span></h3>
+    <div class="row2">
+      <div><label>通知渠道</label>
+        <select id="chSel">
+          <option value="serverchan" ${ch==='serverchan'?'selected':''}>Server酱（推荐）</option>
+          <option value="pushplus" ${ch==='pushplus'?'selected':''}>PushPlus</option>
+          <option value="wecom" ${ch==='wecom'?'selected':''}>企业微信机器人</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>Server酱（推荐） <span class="ct">免费版每天5条，够小画室用</span></h3>
+    <p style="font-size:12.5px;color:var(--ink3);font-weight:300;margin-bottom:10px">获取方式：微信打开 <b>sct.ftqq.com</b> → 用微信登录 → 复制 <b>SendKey</b> 填到下面。</p>
+    <label>SendKey</label><input id="scKey" value="${esc(sc.sendKey||'')}" placeholder="SCTxxxxxxxxxxxx">
+  </div>
+  <div class="card">
+    <h3>PushPlus（备选）</h3>
+    <p style="font-size:12.5px;color:var(--ink3);font-weight:300;margin-bottom:10px">获取方式：微信打开 <b>pushplus.plus</b> → 登录 → 复制 <b>token</b>。</p>
+    <label>Token</label><input id="ppToken" value="${esc(pp.token||'')}" placeholder="pushplus token">
+  </div>
+  <div class="card">
+    <h3>企业微信机器人（备选）</h3>
+    <p style="font-size:12.5px;color:var(--ink3);font-weight:300;margin-bottom:10px">获取方式：企业微信群 → 右上角 → 群机器人 → 添加 → 复制 Webhook 地址。</p>
+    <label>Webhook 地址</label><input id="wcHook" value="${esc(wc.webhook||'')}" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=...">
+  </div>
+  <div class="actions">
+    <button class="btn btn-p" id="setSave" style="padding:10px 28px">保存设置</button>
+    <button class="btn" id="setTest">发送测试通知</button>
+  </div>`);
+  $("#setSave").addEventListener("click", async () => {
+    const body = {
+      notifyChannel: $("#chSel").value,
+      serverchan: { sendKey: $("#scKey").value.trim() },
+      pushplus: { token: $("#ppToken").value.trim() },
+      wecom: { webhook: $("#wcHook").value.trim() }
+    };
+    try { await saveData("settings", body, "设置已保存，立即生效"); }
+    catch (e) { toast(e.message, true); }
+  });
+  $("#setTest").addEventListener("click", async () => {
+    toast("正在发送测试通知…");
+    try {
+      const r = await api("POST", "/api/test-notify", {});
+      toast(r.ok ? "测试通知已发送，请查看微信" : "发送失败");
+    } catch (e) { toast(e.message, true); }
+  });
+};
+
+VIEWS.help = () => {
+  setView("使用说明", "后台使用要点与注意事项。",
+    `<div class="card">
+      <h3>工作原理</h3>
+      <p style="color:var(--ink2);font-weight:300;line-height:2">后台保存内容后，会<strong>自动重新生成</strong>前台所有静态页面（首页、创始人、规划中心、成长故事、全部文章）。前台是纯静态 HTML，利于百度收录与 AI 搜索抓取。</p>
+    </div>
+    <div class="card">
+      <h3>各模块说明</h3>
+      <ul style="margin-left:20px;color:var(--ink2);font-weight:300;line-height:2.2">
+        <li><b>首页内容</b>：网站标题、描述、宣传语、电话、地址、微信二维码、页脚、白皮书表单。正式电话与二维码出来后在此替换。</li>
+        <li><b>课程管理</b>：增删改四门课程，↑↓ 调整顺序，保存后自动生效。</li>
+        <li><b>学生作品</b>：一次可选 50 张以上图片上传，设置分类与描述后「保存全部」；也可拖拽图片进上传区。</li>
+        <li><b>成长案例</b>：每案例含入学情况 / 学习过程 / 家长反馈 / 最终变化四段，支持两张前后对比图，可无限增加。</li>
+        <li><b>FAQ</b>：问题数量不限，前台标题中的「N 个问题」自动跟随。</li>
+        <li><b>文章管理</b>：正文支持 HTML；小标题用 &lt;h2&gt; 会自动生成「本文目录」；文末自动推荐 3 篇相关文章；新增文章请填写英文文件名。</li>
+        <li><b>升学规划</b>：7 个栏目可分别维护，每栏可无限新增文章。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>需要记住的</h3>
+      <ul style="margin-left:20px;color:var(--ink2);font-weight:300;line-height:2.2">
+        <li>默认密码 <b>admin123</b>，登录后请立即在「账号设置」修改。</li>
+        <li>作品、案例图片保存在本机 <b>uploads/</b> 目录，前台用相对路径引用，转发网站时请连同整个文件夹一起发送。</li>
+        <li>前台表单（试听预约、白皮书领取）为<strong>演示状态</strong>：数据不会上传，正式上线时请把表单接入画室微信/电话或表单服务。</li>
+        <li>后台为本地维护工具：启动「启动后台.bat」后在浏览器访问 <b>http://localhost:8080/admin</b>。若端口被占用，请关闭占用 8080 端口的程序后重试。</li>
+      </ul>
+    </div>`);
+};
+</script>
+</body>
+</html>

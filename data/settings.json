@@ -1,0 +1,12 @@
+{
+  "notifyChannel": "serverchan",
+  "serverchan": {
+    "sendKey": "SCT425230TvJW1eUhxsZOltu8mmIaRX2B5"
+  },
+  "pushplus": {
+    "token": ""
+  },
+  "wecom": {
+    "webhook": ""
+  }
+}
