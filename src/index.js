@@ -1,7 +1,97 @@
+async function handleLogin(request, env) {
+  try {
+    const data = await request.json();
+    const password = data.password || "";
+
+    if (!password) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "请输入密码"
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
+    const hashBuffer = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode(password)
+    );
+
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const passwordHash = hashArray
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    const storedHash = await env.QT_ADMIN.get("passwordHash");
+
+    if (!storedHash || passwordHash !== storedHash) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "密码错误"
+        }),
+        {
+          status: 401,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
+    const tokenBytes = crypto.getRandomValues(new Uint8Array(16));
+    const token = Array.from(tokenBytes)
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    await env.QT_ADMIN.put(
+      "token:" + token,
+      "1",
+      {
+        expirationTtl: 8 * 60 * 60
+      }
+    );
+
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        token
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "登录请求错误"
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+}
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    if (url.pathname === "/api/login" && request.method === "POST") {
+  return handleLogin(request, env);
+}
     // API 请求交给 functions/api 中的处理逻辑
     if (url.pathname === "/api/lead" && request.method === "POST") {
       return handleLead(request, env);
