@@ -181,7 +181,7 @@ if (!data) {
 }
 
   return new Response(
-    data 
+    data, 
     {
       headers: {
         "Content-Type": "application/json"
