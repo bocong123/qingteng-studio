@@ -19,10 +19,16 @@
     "id": "308c2a0618ac40569570476997266ee3"
   }
 ],
-  "observability": {
-    "logs": {
-      "enabled": true,
-      "invocation_logs": true
-    }
+"observability": {
+  "logs": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "invocation_logs": true,
+    "persist": true
+  },
+  "traces": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "persist": true
   }
 }
