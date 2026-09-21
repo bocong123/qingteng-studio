@@ -84,6 +84,110 @@ async function handleLogin(request, env) {
       }
     );
   }
+  }
+
+async function handleData(request, env, module) {
+  if (!module) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "module not found"
+      }),
+      {
+        status: 404,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+
+  const token = request.headers.get("X-Token") || "";
+  const valid = token
+    ? await env.QT_ADMIN.get("token:" + token)
+    : null;
+
+  if (!valid) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "未登录"
+      }),
+      {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+
+  const allowed = [
+    "site",
+    "fabout",
+    "courses",
+    "works",
+    "env",
+    "teacher",
+    "whitepaper",
+    "faq",
+    "cases",
+    "articles",
+    "planning",
+    "settings"
+  ];
+
+  if (!allowed.includes(module)) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "module not found"
+      }),
+      {
+        status: 404,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+
+ let data = await env.QT_ADMIN.get("data:" + module);
+
+if (!data) {
+  const assetUrl = new URL("/data/" + module + ".json", request.url);
+  const assetResponse = await env.ASSETS.fetch(
+    new Request(assetUrl.toString())
+  );
+
+  if (assetResponse.ok) {
+    data = await assetResponse.text();
+  }
+}
+
+if (!data) {
+  return new Response(
+    JSON.stringify({
+      ok: false,
+      error: "数据不存在"
+    }),
+    {
+      status: 404,
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
+}
+
+  return new Response(
+    data 
+    {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
 }
 export default {
   async fetch(request, env) {
@@ -91,6 +195,10 @@ export default {
 
     if (url.pathname === "/api/login" && request.method === "POST") {
   return handleLogin(request, env);
+}
+    if (url.pathname.startsWith("/api/data/") && request.method === "GET") {
+  const module = url.pathname.replace("/api/data/", "");
+  return handleData(request, env, module);
 }
     // API 请求交给 functions/api 中的处理逻辑
     if (url.pathname === "/api/lead" && request.method === "POST") {
