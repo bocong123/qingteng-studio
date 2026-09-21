@@ -196,6 +196,9 @@ export default {
     if (url.pathname === "/api/login" && request.method === "POST") {
   return handleLogin(request, env);
 }
+    if (url.pathname === "/api/save" && request.method === "POST") {
+  return handleSave(request, env);
+}
     if (url.pathname.startsWith("/api/data/") && request.method === "GET") {
   const module = url.pathname.replace("/api/data/", "");
   return handleData(request, env, module);
@@ -218,7 +221,94 @@ export default {
   }
 };
 
+async function handleSave(request, env) {
+  const token = request.headers.get("X-Token") || "";
+  const valid = token
+    ? await env.QT_ADMIN.get("token:" + token)
+    : null;
 
+  if (!valid) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "未登录"
+      }),
+      {
+        status: 401,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+
+  try {
+    const body = await request.json();
+    const module = body.module;
+    const data = body.data;
+
+    const allowed = [
+      "site",
+      "fabout",
+      "courses",
+      "works",
+      "env",
+      "teacher",
+      "whitepaper",
+      "faq",
+      "cases",
+      "articles",
+      "planning",
+      "settings"
+    ];
+
+    if (!allowed.includes(module)) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          error: "module not found"
+        }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
+    await env.QT_ADMIN.put(
+      "data:" + module,
+      JSON.stringify(data)
+    );
+
+    return new Response(
+      JSON.stringify({
+        ok: true,
+        message: "保存成功"
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        ok: false,
+        error: "保存失败"
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+  }
+}
 async function handleLead(request, env) {
   try {
     const data = await request.json();
