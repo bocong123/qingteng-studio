@@ -9,10 +9,14 @@
     "binding": "ASSETS"
   },
 
-  "kv_namespaces": [
-    {
-      "binding": "LEADS",
-      "id": "ccef3b33c79043999767358c634a5db5"
-    }
-  ]
+"kv_namespaces": [
+  {
+    "binding": "LEADS",
+    "id": "ccef3b33c79043999767358c634a5db5"
+  },
+  {
+    "binding": "QT_ADMIN",
+    "id": "308c2a0618ac40569570476997266ee3"
+  }
+]
 }
