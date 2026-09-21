@@ -761,7 +761,7 @@ button{font-family:inherit;cursor:pointer}
     xhr.setRequestHeader("Content-Type","application/json");
     xhr.onreadystatechange=function(){
       if(xhr.readyState===4){
-        if(xhr.status===200){try{var j=JSON.parse(xhr.responseText); if(j.ok) done(); else showToast(j.error||"提交失败");}catch(e){showToast("提交失败，请稍后再试");}}
+        if(xhr.status===200){try{var j=JSON.parse(xhr.responseText); if(j.success) done(); else showToast(j.message||j.error||"提交失败");}catch(e){showToast("提交失败，请稍后再试");}}
         else showToast("网络异常，请稍后再试");
       }
     };
