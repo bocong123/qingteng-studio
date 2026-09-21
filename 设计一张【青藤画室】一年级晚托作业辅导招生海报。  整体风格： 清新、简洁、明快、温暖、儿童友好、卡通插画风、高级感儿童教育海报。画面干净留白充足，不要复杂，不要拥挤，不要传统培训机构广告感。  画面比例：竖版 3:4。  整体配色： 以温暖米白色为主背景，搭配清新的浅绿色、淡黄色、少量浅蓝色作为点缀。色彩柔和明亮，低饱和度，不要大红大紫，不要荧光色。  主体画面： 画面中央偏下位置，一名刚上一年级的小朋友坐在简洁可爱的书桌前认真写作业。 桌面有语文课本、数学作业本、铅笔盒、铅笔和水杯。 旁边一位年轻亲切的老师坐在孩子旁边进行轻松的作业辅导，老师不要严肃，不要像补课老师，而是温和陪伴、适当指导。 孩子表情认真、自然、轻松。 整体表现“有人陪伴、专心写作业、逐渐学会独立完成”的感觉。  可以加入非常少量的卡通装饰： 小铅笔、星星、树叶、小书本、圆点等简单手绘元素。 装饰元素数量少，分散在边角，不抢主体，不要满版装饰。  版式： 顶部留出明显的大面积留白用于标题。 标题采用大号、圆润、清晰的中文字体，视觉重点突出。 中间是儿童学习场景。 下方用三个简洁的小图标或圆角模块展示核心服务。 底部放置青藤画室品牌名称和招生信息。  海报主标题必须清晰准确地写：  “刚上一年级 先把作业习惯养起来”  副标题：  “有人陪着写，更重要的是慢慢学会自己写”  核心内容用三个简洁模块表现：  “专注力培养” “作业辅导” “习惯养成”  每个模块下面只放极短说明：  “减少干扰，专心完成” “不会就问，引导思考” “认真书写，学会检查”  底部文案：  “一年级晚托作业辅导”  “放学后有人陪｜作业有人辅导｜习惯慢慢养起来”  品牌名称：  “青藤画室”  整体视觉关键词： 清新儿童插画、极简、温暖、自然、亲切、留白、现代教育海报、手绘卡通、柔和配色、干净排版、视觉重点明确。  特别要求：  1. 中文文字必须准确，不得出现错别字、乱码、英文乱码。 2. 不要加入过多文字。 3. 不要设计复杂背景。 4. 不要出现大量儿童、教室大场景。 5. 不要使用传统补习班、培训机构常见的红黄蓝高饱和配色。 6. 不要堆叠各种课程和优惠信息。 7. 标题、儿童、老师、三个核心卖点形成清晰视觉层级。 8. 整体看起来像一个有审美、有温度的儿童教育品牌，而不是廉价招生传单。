@@ -1,0 +1,17 @@
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    // 暂时只测试 Worker 是否正常运行
+    if (url.pathname === "/worker-test") {
+      return new Response("Qingteng Worker OK", {
+        headers: {
+          "Content-Type": "text/plain; charset=UTF-8"
+        }
+      });
+    }
+
+    // 其他请求交给静态资源
+    return env.ASSETS.fetch(request);
+  }
+};
