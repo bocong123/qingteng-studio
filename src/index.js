@@ -370,32 +370,41 @@ async function handleLead(request, env) {
     // Server酱通知
     const key = env.SERVERCHAN_KEY;
 
-    if (key) {
-      try {
-        await fetch(
-          "https://sctapi.ftqq.com/" + key + ".send",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: new URLSearchParams({
-              title: "青藤画室收到新的报名咨询",
-              desp:
-                `姓名：${name}\n` +
-                `电话：${phone}\n` +
-                `微信：${wechat}\n` +
-                `年级：${grade}\n` +
-                `课程：${course}\n` +
-                `留言：${message}\n` +
-                `来源：${source}`
-            })
-          }
-        );
-      } catch (error) {
-        console.error("Server酱通知失败:", error);
+if (key) {
+  try {
+    const notifyResponse = await fetch(
+      "https://sctapi.ftqq.com/" + key + ".send",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+          title: "青藤画室收到新的报名咨询",
+          desp:
+            `姓名：${name}\n` +
+            `电话：${phone}\n` +
+            `微信：${wechat}\n` +
+            `年级：${grade}\n` +
+            `课程：${course}\n` +
+            `留言：${message}\n` +
+            `来源：${source}`
+        })
       }
-    }
+    );
+
+    const notifyResult = await notifyResponse.text();
+
+    console.log(
+      "Server酱返回：",
+      notifyResponse.status,
+      notifyResult
+    );
+
+  } catch (error) {
+    console.error("Server酱通知失败:", error);
+  }
+}
 
     return new Response(
       JSON.stringify({
